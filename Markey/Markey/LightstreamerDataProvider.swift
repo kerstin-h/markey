@@ -9,7 +9,17 @@
 
 import LightstreamerClient
 
+struct PriceUpdate {
+    let stockName: String
+    let lastPrice: Double
+}
+
 final class LightstreamerDataProvider {
+    private enum Fields: String {
+        case stockName = "stock_name"
+        case lastPrice = "last_price"
+    }
+    
     private var client: LightstreamerClient?
     private var subscription: Subscription?
 
@@ -27,7 +37,7 @@ final class LightstreamerDataProvider {
     func subscribe() {
         guard let client else { return }
         let items = [ "item1", "item2", "item3" ]
-        let fields = [ "stock_name", "last_price" ]
+        let fields = [ Fields.stockName.rawValue, Fields.lastPrice.rawValue ]
         subscription = Subscription(subscriptionMode: .MERGE, items: items, fields: fields)
         guard let subscription else { return }
         subscription.dataAdapter = "QUOTE_ADAPTER"
@@ -38,6 +48,11 @@ final class LightstreamerDataProvider {
 }
 
 extension LightstreamerDataProvider: SubscriptionDelegate {
+
+    func subscription(_ subscription: Subscription, didUpdateItem itemUpdate: ItemUpdate) {
+        print("\(String(describing: itemUpdate.value(withFieldName: Fields.stockName.rawValue))): \(String(describing: itemUpdate.value(withFieldName: Fields.lastPrice.rawValue)))")
+    }
+
     func subscription(_ subscription: Subscription, didClearSnapshotForItemName itemName: String?, itemPos: UInt) { }
     
     func subscription(_ subscription: Subscription, didLoseUpdates lostUpdates: UInt, forCommandSecondLevelItemWithKey key: String) { }
@@ -59,8 +74,4 @@ extension LightstreamerDataProvider: SubscriptionDelegate {
     func subscriptionDidUnsubscribe(_ subscription: Subscription) { }
     
     func subscription(_ subscription: Subscription, didReceiveRealFrequency frequency: RealMaxFrequency?) { }
-    
-    func subscription(_ subscription: Subscription, didUpdateItem itemUpdate: ItemUpdate) {
-        print("\(String(describing: itemUpdate.value(withFieldName: "stock_name"))): \(String(describing: itemUpdate.value(withFieldName: "last_price")))")
-    }
 }
