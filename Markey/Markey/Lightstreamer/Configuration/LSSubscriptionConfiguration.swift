@@ -20,7 +20,7 @@ struct LSSubscriptionConfiguration {
     let requestedSnapshot: LSSubscription.RequestedSnapshot
 
     init(mode: LSSubscription.Mode = .MERGE,
-         items: [String] = [ "item1", "item2", "item3", "item4", "item5" ],
+         items: [String] = defaultItemNames(),
          fields: [Fields] = [.stockName, .lastPrice],
          dataAdapter: String = "QUOTE_ADAPTER",
          requestedSnapshot: Bool = true) {
@@ -29,5 +29,9 @@ struct LSSubscriptionConfiguration {
         self.fields = fields.map { $0.rawValue }
         self.dataAdapter = dataAdapter
         self.requestedSnapshot = requestedSnapshot ? .yes : .no
+    }
+
+    static func defaultItemNames(count: Int = 25) -> [String] {
+        return (1...count).map { "item\($0)" }
     }
 }

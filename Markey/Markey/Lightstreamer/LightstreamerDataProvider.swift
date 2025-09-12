@@ -10,32 +10,41 @@
 import Combine
 import LightstreamerClient
 
-final class LightstreamerDataProvider {
+class LightstreamerDataProvider: SubscriptionDelegate {
+    let pricesPublisher = PassthroughSubject<MarketPrice, Never>()
     
-    private var client: LightstreamerClient?
+    private var client: LightstreamerClientProtocol?
+    private var subscriptionConfig: LSSubscriptionConfiguration?
     private var subscription: LSSubscription?
 
-    let pricesPublisher = PassthroughSubject<MarketPrice, Never>()
+    func instantiate(configuration: LSConfiguration) {
+        self.client = lightstreamerClient(serverAddress: configuration.clientConfig.endpoint,
+                                          adapterSet: configuration.clientConfig.adapterSet)
+        self.subscriptionConfig = configuration.subscriptionConfig
+    }
 
-    func instantiate(configuration: LSClientConfiguration) {
-        self.client = LightstreamerClient(
-            serverAddress: configuration.endpoint,
-            adapterSet: configuration.adapterSet
-        )
+    func lightstreamerClient(serverAddress: String, adapterSet: String) -> LightstreamerClientProtocol {
+        LightstreamerClient(serverAddress: serverAddress,
+                            adapterSet: adapterSet)
     }
 
     func connect() {
         client?.connect()
     }
 
-    func subscribe(with configuration: LSSubscriptionConfiguration) {
-        guard let client else { return }
-        let items = configuration.items
-        let fields = configuration.fields
+    func subscribe() {
+        guard let client,
+            let mode = subscriptionConfig?.mode,
+            let items = subscriptionConfig?.items,
+            let fields = subscriptionConfig?.fields else {
+            return
+        }
         if subscription == nil {
-            subscription = Subscription(subscriptionMode: configuration.mode, items: items, fields: fields)
-            subscription?.dataAdapter = configuration.dataAdapter
-            subscription?.requestedSnapshot = configuration.requestedSnapshot
+            subscription = Subscription(subscriptionMode: mode,
+                                        items: items,
+                                        fields: fields)
+            subscription?.dataAdapter = subscriptionConfig?.dataAdapter
+            subscription?.requestedSnapshot = subscriptionConfig?.requestedSnapshot
         }
         guard let subscription else { return }
         client.subscribe(subscription)
@@ -51,11 +60,11 @@ final class LightstreamerDataProvider {
         guard let subscription else { return }
         client?.unsubscribe(subscription)
     }
-}
 
-extension LightstreamerDataProvider: SubscriptionDelegate {
+    // MARK: SubscriptionDelegate
 
-    func subscription(_ subscription: LSSubscription, didUpdateItem itemUpdate: ItemUpdate) {
+    func subscription(_ subscription: LSSubscription,
+                      didUpdateItem itemUpdate: ItemUpdate) {
         guard let stockName = itemUpdate.value(withFieldName: Fields.stockName.rawValue),
               let lastPrice = itemUpdate.value(withFieldName: Fields.lastPrice.rawValue) else {
             return

@@ -16,13 +16,26 @@ struct MarketsListView: View {
     }
 
     var body: some View {
-        List(viewModel.marketList, id: \.stockName) { market in
-            HStack(spacing: .zero) {
-                Text(market.stockName)
-                Spacer()
-                Text(market.lastPrice)
+        NavigationStack {
+            VStack(alignment: .center, spacing: .zero) {
+                List(viewModel.marketList, id: \.stockName) { market in
+                    HStack(spacing: .zero) {
+                        Text(market.stockName)
+                        Spacer()
+                        Text(market.lastPrice)
+                    }
+                }
+                Divider()
+                Text("*Data based on a questionable sample of Lightstreamer demo stocks.")
+                    .font(.system(size: 12))
+                    .foregroundColor(.gray)
+                    .padding(.top, 16)
+                    .padding(.horizontal, 16)
             }
+            .navigationTitle("Popular* Markets")
+            .navigationBarTitleDisplayMode(.inline)
         }
+        .ignoresSafeArea()
         .onAppear {
             viewModel.startStreaming()
         }

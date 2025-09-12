@@ -8,7 +8,7 @@
 import Combine
 
 final class MarketsListViewModel: ObservableObject {
-    @Published private var markets = [String: String]()
+    @Published var markets = [String: String]()
 
     public var marketList: [MarketPrice] {
         let marketList = markets.sorted(by: { $0.key < $1.key })
@@ -16,7 +16,6 @@ final class MarketsListViewModel: ObservableObject {
     }
     
     private let streamingDataProvider: LightstreamerDataProvider
-    private var lsConfiguration: LSConfiguration?
     private var subscriptions = Set<AnyCancellable>()
     
     init(streamingDataProvider: LightstreamerDataProvider) {
@@ -28,15 +27,14 @@ final class MarketsListViewModel: ObservableObject {
     }
     
     private func configureLightstreamer() {
+        // We create the configuration here so that (in future work) the user can modify these values
         let lsConfiguration = LSConfiguration()
-        self.lsConfiguration = lsConfiguration
-        streamingDataProvider.instantiate(configuration: lsConfiguration.clientConfig)
+        streamingDataProvider.instantiate(configuration: lsConfiguration)
     }
 
     func startStreaming() {
-        guard let lsConfiguration else { return }
         streamingDataProvider.connect()
-        streamingDataProvider.subscribe(with: lsConfiguration.subscriptionConfig)
+        streamingDataProvider.subscribe()
     }
 
     func stopStreaming() {
