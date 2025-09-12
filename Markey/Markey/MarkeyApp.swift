@@ -12,7 +12,7 @@ import SwiftData
 struct MarkeyApp: App {
     var body: some Scene {
         WindowGroup {
-            let coordinator = ContentViewCoordinator()
+            let coordinator = MarketsListViewCoordinator()
             coordinator.instantiate()
         }
     }

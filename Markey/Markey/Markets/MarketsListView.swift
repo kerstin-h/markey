@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  MarketsListView.swift
 //  Markey
 //
 //  Created by Kerstin Haustein on 11/09/2025.
@@ -8,10 +8,10 @@
 import SwiftUI
 import SwiftData
 
-struct ContentView: View {
-    @ObservedObject private var viewModel: ContentViewModel
+struct MarketsListView: View {
+    @ObservedObject private var viewModel: MarketsListViewModel
     
-    init(viewModel: ContentViewModel) {
+    init(viewModel: MarketsListViewModel) {
         self.viewModel = viewModel
     }
 
@@ -33,11 +33,11 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(viewModel: ContentViewModel.mock)
+    MarketsListView(viewModel: MarketsListViewModel.mock)
 }
 
-extension ContentViewModel {
-    static var mock: ContentViewModel {
+extension MarketsListViewModel {
+    static var mock: MarketsListViewModel {
         .init(streamingDataProvider: .init())
     }
 }

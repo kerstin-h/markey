@@ -11,20 +11,16 @@ import Combine
 import LightstreamerClient
 
 final class LightstreamerDataProvider {
-    private enum Fields: String {
-        case stockName = "stock_name"
-        case lastPrice = "last_price"
-    }
     
     private var client: LightstreamerClient?
     private var subscription: LSSubscription?
 
     let pricesPublisher = PassthroughSubject<MarketPrice, Never>()
 
-    func instantiate(endpoint: String) {
+    func instantiate(configuration: LSClientConfiguration) {
         self.client = LightstreamerClient(
-            serverAddress: endpoint,
-            adapterSet: "DEMO"
+            serverAddress: configuration.endpoint,
+            adapterSet: configuration.adapterSet
         )
     }
 
@@ -32,14 +28,14 @@ final class LightstreamerDataProvider {
         client?.connect()
     }
 
-    func subscribe() {
+    func subscribe(with configuration: LSSubscriptionConfiguration) {
         guard let client else { return }
-        let items = [ "item1", "item2", "item3" ]
-        let fields = [ Fields.stockName.rawValue, Fields.lastPrice.rawValue ]
+        let items = configuration.items
+        let fields = configuration.fields
         if subscription == nil {
-            subscription = Subscription(subscriptionMode: .MERGE, items: items, fields: fields)
-            subscription?.dataAdapter = "QUOTE_ADAPTER"
-            subscription?.requestedSnapshot = .yes
+            subscription = Subscription(subscriptionMode: configuration.mode, items: items, fields: fields)
+            subscription?.dataAdapter = configuration.dataAdapter
+            subscription?.requestedSnapshot = configuration.requestedSnapshot
         }
         guard let subscription else { return }
         client.subscribe(subscription)
@@ -69,8 +65,10 @@ extension LightstreamerDataProvider: SubscriptionDelegate {
             stockName: stockName,
             lastPrice: lastPrice
         )
-        pricesPublisher.send(priceUpdate)
-        print("\(stockName) \(lastPrice)")
+        
+        Task { @MainActor in
+            self.pricesPublisher.send(priceUpdate)
+        }
     }
 
     func subscription(_ subscription: LSSubscription, didClearSnapshotForItemName itemName: String?, itemPos: UInt) { }
