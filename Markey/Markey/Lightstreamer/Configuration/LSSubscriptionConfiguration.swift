@@ -8,8 +8,21 @@
 import LightstreamerClient
 
 enum Fields: String {
-    case stockName = "stock_name"
+    case ask = "ask"
+    case bid = "bid"
+    case itemStatus = "item_status"
     case lastPrice = "last_price"
+    case max = "max"
+    case min = "min"
+    case open = "open_price"
+    case percentChange = "pct_change"
+    case referencePrice = "ref_price"
+    case stockName = "stock_name"
+    case time = "time"
+
+    static var allCases: [Fields] {
+        [.ask, .bid, .itemStatus, .lastPrice, .max, .min, .open, .percentChange, .referencePrice, .stockName, .time]
+    }
 }
 
 struct LSSubscriptionConfiguration {
