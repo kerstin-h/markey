@@ -31,7 +31,7 @@ struct LSSubscriptionConfiguration {
         self.requestedSnapshot = requestedSnapshot ? .yes : .no
     }
 
-    static func defaultItemNames(count: Int = 25) -> [String] {
+    static func defaultItemNames(count: Int = 35) -> [String] {
         return (1...count).map { "item\($0)" }
     }
 }
