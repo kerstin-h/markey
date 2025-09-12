@@ -18,11 +18,15 @@ struct MarketsListView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .center, spacing: .zero) {
-                List(viewModel.marketList, id: \.stockName) { market in
-                    HStack(spacing: .zero) {
-                        Text(market.stockName)
-                        Spacer()
-                        Text(market.lastPrice)
+                List {
+                    Section(header: header) {
+                        ForEach(viewModel.marketList, id: \.stockName) { market in
+                            HStack(spacing: .zero) {
+                                Text(market.stockName)
+                                Spacer()
+                                Text(market.lastPrice)
+                            }
+                        }
                     }
                 }
                 Divider()
@@ -32,7 +36,7 @@ struct MarketsListView: View {
                     .padding(.top, 16)
                     .padding(.horizontal, 16)
             }
-            .navigationTitle("Popular* Markets")
+            .navigationTitle("Popular Markets*")
             .navigationBarTitleDisplayMode(.inline)
         }
         .ignoresSafeArea()
@@ -41,6 +45,14 @@ struct MarketsListView: View {
         }
         .onDisappear {
             viewModel.stopStreaming()
+        }
+    }
+    
+    private var header: some View {
+        HStack() {
+            Text("Market Name")
+            Spacer()
+            Text("Stock Price")
         }
     }
 }
