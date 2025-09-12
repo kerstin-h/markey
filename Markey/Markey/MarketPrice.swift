@@ -1,0 +1,11 @@
+//
+//  MarketPrice.swift
+//  Markey
+//
+//  Created by Kerstin Haustein on 12/09/2025.
+//
+
+struct MarketPrice {
+    let stockName: String
+    let lastPrice: String
+}

@@ -8,6 +8,6 @@
 final class ContentViewCoordinator {
     func instantiate() -> ContentView {
         let dataProvider = LightstreamerDataProvider()
-        return ContentView(contentViewModel: ContentViewModel(streamingDataProvider: dataProvider))
+        return ContentView(viewModel: ContentViewModel(streamingDataProvider: dataProvider))
     }
 }
