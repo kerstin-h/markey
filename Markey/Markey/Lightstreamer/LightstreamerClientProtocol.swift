@@ -15,9 +15,6 @@ protocol LightstreamerClientProtocol: AnyObject {
     func disconnect()
     func subscribe(_ subscription: LSSubscription)
     func unsubscribe(_ subscription: LSSubscription)
-    
-    
-    // func subscription(_ subscription: LSSubscription, didUpdateItem itemUpdate: ItemUpdate)
 }
 
 extension LightstreamerClient: LightstreamerClientProtocol {}

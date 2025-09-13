@@ -31,13 +31,12 @@ final class MarketsListViewModelTests {
         let streamerSubscription = DataStreamerSubscriptionMock()
         let dataProvider = streamingDataProvider(streamerSubscription: streamerSubscription)
         let viewModel = viewModel(dataProvider: dataProvider)
+        viewModel.startStreaming()
         
-        await confirmation(expectedCount: 1) { confirm in
+        await confirmation(expectedCount: 2) { confirm in
             #expect(viewModel.marketList.count == 0)
             viewModel.$markets.sink(receiveValue: { marketPrice in
-                if marketPrice.keys.count > 1 {
-                    confirm()
-                }
+                confirm()
             }).store(in: &subscriptions)
             streamerSubscription.publish(marketPriceUpdate)
         }
@@ -51,18 +50,4 @@ final class MarketsListViewModelTests {
     @Test func marketsSortedAlphabetically() async throws {}
     
     @Test func startStreamingSubscribesOnceOnly() async throws {}
-}
-
-final class DataStreamingServiceMock: DataStreamingServiceProtocol {
-    private let streamerSubscription: DataStreamerSubscriptionMock
-    
-    init(streamerSubscription: DataStreamerSubscriptionMock) {
-        self.streamerSubscription = streamerSubscription
-    }
-    
-    func newSubscription() -> any Markey.DataStreamerSubscriptionProtocol {
-        streamerSubscription
-    }
-    
-    func startStreaming(subscription: any Markey.DataStreamerSubscriptionProtocol) {}
 }

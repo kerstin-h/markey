@@ -12,8 +12,12 @@ import SwiftData
 struct MarkeyApp: App {
     var body: some Scene {
         WindowGroup {
-            let coordinator = MarketsListViewCoordinator()
-            coordinator.instantiate()
+            if (ProcessInfo.processInfo.environment["XCTestSessionIdentifier"] != nil) {
+                EmptyView()
+            } else {
+                let coordinator = RootCoordinator()
+                coordinator.instantiate()
+            }
         }
     }
 }
