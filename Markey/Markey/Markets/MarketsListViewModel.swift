@@ -5,6 +5,7 @@
 //  Created by Kerstin Haustein on 11/09/2025.
 //
 
+import Foundation
 import Combine
 
 final class MarketsListViewModel: ObservableObject {
@@ -20,7 +21,7 @@ final class MarketsListViewModel: ObservableObject {
     
     init(streamingDataProvider: MarketStreamingDataProvider) {
         self.streamingDataProvider = streamingDataProvider
-        streamingDataProvider.marketPricesPublisher.sink(receiveValue: { [weak self] marketPrice in
+        streamingDataProvider.marketPricesPublisher.receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] marketPrice in
             self?.markets[marketPrice.stockName] = marketPrice
         }).store(in: &subscriptions)
     }

@@ -26,15 +26,15 @@ final class MarketsListViewModelTests {
     
     // MARK: Tests
 
-    @Test func startStreamingBeginsUpdates() async throws {
+    @Test func startStreamingBeginsPriceUpdates() async throws {
         let marketPriceUpdate = MarketPrice.mock(stockName: "Nintendo", lastPrice: "100", changePercent: "10")
         let streamerSubscription = DataStreamerSubscriptionMock()
         let dataProvider = streamingDataProvider(streamerSubscription: streamerSubscription)
         let viewModel = viewModel(dataProvider: dataProvider)
-        viewModel.startStreaming()
+        #expect(viewModel.marketList.count == 0)
         
+        viewModel.startStreaming()
         await confirmation(expectedCount: 2) { confirm in
-            #expect(viewModel.marketList.count == 0)
             viewModel.$markets.sink(receiveValue: { marketPrice in
                 confirm()
             }).store(in: &subscriptions)

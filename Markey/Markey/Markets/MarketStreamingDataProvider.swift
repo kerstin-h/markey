@@ -6,6 +6,7 @@
 //
 //
 
+import Foundation
 import Combine
 
 class MarketStreamingDataProvider {
@@ -38,7 +39,7 @@ class MarketStreamingDataProvider {
     
     private func subscribe() -> DataStreamerSubscriptionProtocol {
         let streamerSubscription = streamingService.newSubscription()
-        streamerSubscription.streamingDataPublisher.sink(receiveValue: { [weak self] priceUpdate in
+        streamerSubscription.streamingDataPublisher.receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] priceUpdate in
             self?.pricesPublisher.send(priceUpdate)
         }).store(in: &priceSubscriptions)
         return streamerSubscription
