@@ -8,37 +8,28 @@
 import Combine
 
 final class MarketsListViewModel: ObservableObject {
-    @Published var markets = [String: MarketPrice]()
+    @Published private(set) var markets = [String: MarketPrice]()
 
     public var marketList: [MarketPrice] {
         let marketList = markets.sorted(by: { $0.key < $1.key })
         return marketList.map { $0.value }
     }
     
-    private let streamingDataProvider: LightstreamerDataProvider
+    private let streamingDataProvider: MarketStreamingDataProvider
     private var subscriptions = Set<AnyCancellable>()
     
-    init(streamingDataProvider: LightstreamerDataProvider) {
+    init(streamingDataProvider: MarketStreamingDataProvider) {
         self.streamingDataProvider = streamingDataProvider
-        streamingDataProvider.pricesPublisher.sink(receiveValue: { [weak self] marketPrice in
+        streamingDataProvider.marketPricesPublisher.sink(receiveValue: { [weak self] marketPrice in
             self?.markets[marketPrice.stockName] = marketPrice
         }).store(in: &subscriptions)
-        configureLightstreamer()
-    }
-    
-    private func configureLightstreamer() {
-        // We create the configuration here so that (in future work) the user can modify these values
-        let lsConfiguration = LSConfiguration()
-        streamingDataProvider.instantiate(configuration: lsConfiguration)
     }
 
     func startStreaming() {
-        streamingDataProvider.connect()
-        streamingDataProvider.subscribe()
+        streamingDataProvider.startStreaming()
     }
 
     func stopStreaming() {
-        streamingDataProvider.unsubscribe()
-        streamingDataProvider.disconnect()
+        streamingDataProvider.stopStreaming()
     }
 }

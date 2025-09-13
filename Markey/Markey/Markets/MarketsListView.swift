@@ -65,6 +65,6 @@ struct MarketsListView: View {
 
 extension MarketsListViewModel {
     static var mock: MarketsListViewModel {
-        .init(streamingDataProvider: .init())
+        MarketsListViewCoordinator.createViewModel()
     }
 }

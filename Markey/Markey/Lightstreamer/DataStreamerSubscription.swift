@@ -1,68 +1,47 @@
 //
-//  LightstreamerDataProvider.swift
+//  DataStreamerSubscription.swift
 //  Markey
 //
-//  Created by Kerstin Haustein on 11/09/2025.
-//
-//  Lightstreamer docs: https://github.com/Lightstreamer/Lightstreamer-lib-client-swift/tree/6.2.1
+//  Created by Kerstin Haustein on 13/09/2025.
 //
 
 import Combine
 import LightstreamerClient
 
-class LightstreamerDataProvider: SubscriptionDelegate {
-    let pricesPublisher = PassthroughSubject<MarketPrice, Never>()
+protocol DataStreamerSubscriptionProtocol {
+    var streamingDataPublisher: AnyPublisher<MarketPrice, Never> { get }
     
-    private var client: LightstreamerClientProtocol?
-    private var subscriptionConfig: LSSubscriptionConfiguration?
-    private var subscription: LSSubscription?
+    func subscribe()
+    func unsubscribe()
+}
 
-    func instantiate(configuration: LSConfiguration) {
-        self.client = lightstreamerClient(serverAddress: configuration.clientConfig.endpoint,
-                                          adapterSet: configuration.clientConfig.adapterSet)
-        self.subscriptionConfig = configuration.subscriptionConfig
+final class DataStreamerSubscription: DataStreamerSubscriptionProtocol {
+    private weak var client: LightstreamerClientProtocol?
+    private let dataPublisher = PassthroughSubject<MarketPrice, Never>()
+    private let subscription: LSSubscription
+    
+    lazy var streamingDataPublisher: AnyPublisher<MarketPrice, Never> = {
+        dataPublisher.eraseToAnyPublisher()
+    }()
+    
+    init(client: LightstreamerClientProtocol,
+         subscription: LSSubscription) {
+        self.client = client
+        self.subscription = subscription
     }
-
-    func lightstreamerClient(serverAddress: String, adapterSet: String) -> LightstreamerClientProtocol {
-        LightstreamerClient(serverAddress: serverAddress,
-                            adapterSet: adapterSet)
-    }
-
-    func connect() {
-        client?.connect()
-    }
-
+    
     func subscribe() {
-        guard let client,
-            let mode = subscriptionConfig?.mode,
-            let items = subscriptionConfig?.items,
-            let fields = subscriptionConfig?.fields else {
-            return
-        }
-        if subscription == nil {
-            subscription = Subscription(subscriptionMode: mode,
-                                        items: items,
-                                        fields: fields)
-            subscription?.dataAdapter = subscriptionConfig?.dataAdapter
-            subscription?.requestedSnapshot = subscriptionConfig?.requestedSnapshot
-        }
-        guard let subscription else { return }
-        client.subscribe(subscription)
+        client?.subscribe(subscription)
         subscription.addDelegate(self)
     }
 
-    func disconnect() {
-        client?.disconnect()
-    }
-
     func unsubscribe() {
-        subscription?.removeDelegate(self)
-        guard let subscription else { return }
+        subscription.removeDelegate(self)
         client?.unsubscribe(subscription)
     }
+}
 
-    // MARK: SubscriptionDelegate
-
+extension DataStreamerSubscription: SubscriptionDelegate {
     func subscription(_ subscription: LSSubscription,
                       didUpdateItem itemUpdate: ItemUpdate) {
         guard let stockName = itemUpdate.value(withFieldName: Fields.stockName.rawValue),
@@ -76,7 +55,7 @@ class LightstreamerDataProvider: SubscriptionDelegate {
                                       changePercent: changePercent)
         
         Task { @MainActor in
-            self.pricesPublisher.send(priceUpdate)
+            self.dataPublisher.send(priceUpdate)
         }
     }
 
@@ -102,3 +81,4 @@ class LightstreamerDataProvider: SubscriptionDelegate {
     
     func subscription(_ subscription: LSSubscription, didReceiveRealFrequency frequency: RealMaxFrequency?) { }
 }
+
