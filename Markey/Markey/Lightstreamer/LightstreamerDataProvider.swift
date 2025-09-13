@@ -66,14 +66,14 @@ class LightstreamerDataProvider: SubscriptionDelegate {
     func subscription(_ subscription: LSSubscription,
                       didUpdateItem itemUpdate: ItemUpdate) {
         guard let stockName = itemUpdate.value(withFieldName: Fields.stockName.rawValue),
-              let lastPrice = itemUpdate.value(withFieldName: Fields.lastPrice.rawValue) else {
+              let lastPrice = itemUpdate.value(withFieldName: Fields.lastPrice.rawValue),
+              let changePercent = itemUpdate.value(withFieldName: Fields.percentChange.rawValue) else {
             return
         }
         
-        let priceUpdate = MarketPrice(
-            stockName: stockName,
-            lastPrice: lastPrice
-        )
+        let priceUpdate = MarketPrice(stockName: stockName,
+                                      lastPrice: lastPrice,
+                                      changePercent: changePercent)
         
         Task { @MainActor in
             self.pricesPublisher.send(priceUpdate)

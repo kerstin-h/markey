@@ -8,11 +8,11 @@
 import Combine
 
 final class MarketsListViewModel: ObservableObject {
-    @Published var markets = [String: String]()
+    @Published var markets = [String: MarketPrice]()
 
     public var marketList: [MarketPrice] {
         let marketList = markets.sorted(by: { $0.key < $1.key })
-        return marketList.map { MarketPrice(stockName: $0.key, lastPrice: $0.value) }
+        return marketList.map { $0.value }
     }
     
     private let streamingDataProvider: LightstreamerDataProvider
@@ -21,7 +21,7 @@ final class MarketsListViewModel: ObservableObject {
     init(streamingDataProvider: LightstreamerDataProvider) {
         self.streamingDataProvider = streamingDataProvider
         streamingDataProvider.pricesPublisher.sink(receiveValue: { [weak self] marketPrice in
-            self?.markets[marketPrice.stockName] = marketPrice.lastPrice
+            self?.markets[marketPrice.stockName] = marketPrice
         }).store(in: &subscriptions)
         configureLightstreamer()
     }

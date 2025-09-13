@@ -21,10 +21,11 @@ struct MarketsListView: View {
                 List {
                     Section(header: header) {
                         ForEach(viewModel.marketList, id: \.stockName) { market in
-                            HStack(spacing: .zero) {
+                            HStack(spacing: 12) {
                                 Text(market.stockName)
                                 Spacer()
                                 Text(market.lastPrice)
+                                Text(market.changePercent)
                             }
                         }
                     }
@@ -49,10 +50,11 @@ struct MarketsListView: View {
     }
     
     private var header: some View {
-        HStack() {
+        HStack(spacing: 12) {
             Text("Market Name")
             Spacer()
             Text("Stock Price")
+            Text("Change")
         }
     }
 }

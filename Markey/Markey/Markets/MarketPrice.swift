@@ -8,4 +8,5 @@
 struct MarketPrice {
     let stockName: String
     let lastPrice: String
+    let changePercent: String
 }

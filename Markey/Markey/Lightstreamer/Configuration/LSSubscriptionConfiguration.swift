@@ -34,7 +34,7 @@ struct LSSubscriptionConfiguration {
 
     init(mode: LSSubscription.Mode = .MERGE,
          items: [String] = defaultItemNames(),
-         fields: [Fields] = [.stockName, .lastPrice],
+         fields: [Fields] = [.stockName, .lastPrice, .percentChange],
          dataAdapter: String = "QUOTE_ADAPTER",
          requestedSnapshot: Bool = true) {
         self.mode = mode
