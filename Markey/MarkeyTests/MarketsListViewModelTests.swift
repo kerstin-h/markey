@@ -13,6 +13,10 @@ import Combine
 final class MarketsListViewModelTests: Confirmation {
     private var subscriptions = Set<AnyCancellable>()
     
+    lazy var confirm: Confirm = {
+        newConfirm()
+    }()
+    
     // MARK: Test helpers
     
     private func viewModel(dataProvider: MarketStreamingDataProvider? = nil) -> MarketsListViewModel {
@@ -32,17 +36,16 @@ final class MarketsListViewModelTests: Confirmation {
     
     // MARK: Tests
 
-    @Test func startStreamingBeginsPriceUpdates() async throws {
+    @Test("Start streaming begins price updates") func startStreaming() async throws {
         let marketPriceUpdate = MarketPrice.mock(stockName: "Nintendo", lastPrice: "100", changePercent: "10")
         let streamerSubscription = DataStreamerSubscriptionMock()
         let viewModel = viewModel(streamerSubscription: streamerSubscription)
-        let confirm = confirm(comment: "The price update is successfully published")
         
         #expect(viewModel.marketList.count == 0)
         viewModel.startStreaming()
-        await confirmation(confirm) {
-            viewModel.$markets.dropFirst().receive(on: DispatchQueue.main).sink(receiveValue: { marketPrice in
-                confirm.fulfill()
+        await confirmation {
+            viewModel.$markets.dropFirst().receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] marketPrice in
+                self?.confirm()
             }).store(in: &self.subscriptions)
             streamerSubscription.publish(marketPriceUpdate)
         }
