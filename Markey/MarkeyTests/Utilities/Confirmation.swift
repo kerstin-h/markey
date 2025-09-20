@@ -7,15 +7,17 @@
 
 import XCTest
 
-/// wraps XCTestExpectation since await confirmation() does not work reliably with combine
+/// wraps XCTestExpectation in Swift Testing style confirmation since await confirmation() does not currently work reliably with combine
 protocol Confirmation {}
 
 extension Confirmation {
-    func confirmation(comment: String) -> XCTestExpectation {
+    func confirm(comment: String) -> XCTestExpectation {
         XCTestExpectation(description: comment)
     }
 
-    func completion(confirmation: XCTestExpectation) async {
+    func confirmation(_ confirmation: XCTestExpectation,
+                      body: @escaping () -> Void) async {
+        body()
         await XCTWaiter().fulfillment(of: [confirmation], timeout: 1.0)
     }
 }

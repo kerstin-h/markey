@@ -36,20 +36,21 @@ final class MarketsListViewModelTests: Confirmation {
         let marketPriceUpdate = MarketPrice.mock(stockName: "Nintendo", lastPrice: "100", changePercent: "10")
         let streamerSubscription = DataStreamerSubscriptionMock()
         let viewModel = viewModel(streamerSubscription: streamerSubscription)
-        let confirmation = confirmation(comment: "The price update is successfully published")
+        let confirm = confirm(comment: "The price update is successfully published")
         
         #expect(viewModel.marketList.count == 0)
         viewModel.startStreaming()
-        viewModel.$markets.dropFirst().receive(on: DispatchQueue.main).sink(receiveValue: { marketPrice in
-            confirmation.fulfill()
-        }).store(in: &self.subscriptions)
-        streamerSubscription.publish(marketPriceUpdate)
-        await completion(confirmation: confirmation)
+        await confirmation(confirm) {
+            viewModel.$markets.dropFirst().receive(on: DispatchQueue.main).sink(receiveValue: { marketPrice in
+                confirm.fulfill()
+            }).store(in: &self.subscriptions)
+            streamerSubscription.publish(marketPriceUpdate)
+        }
         
-        try #require(viewModel.marketList.count == 1)
-        #expect(viewModel.marketList[0].stockName == "Nintendo")
-        #expect(viewModel.marketList[0].lastPrice == "100")
-        #expect(viewModel.marketList[0].changePercent == "10")
+        let firstMarket = try #require(viewModel.marketList.first)
+        #expect(firstMarket.stockName == "Nintendo")
+        #expect(firstMarket.lastPrice == "100")
+        #expect(firstMarket.changePercent == "10")
     }
     
     @Test func marketsSortedAlphabetically() async throws {}
