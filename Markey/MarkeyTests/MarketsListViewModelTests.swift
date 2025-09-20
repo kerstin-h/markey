@@ -6,16 +6,22 @@
 //
 
 import Testing
+import Foundation
 import Combine
 @testable import Markey
 
-final class MarketsListViewModelTests {
+final class MarketsListViewModelTests: Confirmation {
     private var subscriptions = Set<AnyCancellable>()
     
     // MARK: Test helpers
     
     private func viewModel(dataProvider: MarketStreamingDataProvider? = nil) -> MarketsListViewModel {
         let dataProvider = dataProvider ?? streamingDataProvider()
+        return MarketsListViewModel(streamingDataProvider: dataProvider)
+    }
+
+    private func viewModel(streamerSubscription: DataStreamerSubscriptionMock) -> MarketsListViewModel {
+        let dataProvider = streamingDataProvider(streamerSubscription: streamerSubscription)
         return MarketsListViewModel(streamingDataProvider: dataProvider)
     }
     
@@ -29,22 +35,21 @@ final class MarketsListViewModelTests {
     @Test func startStreamingBeginsPriceUpdates() async throws {
         let marketPriceUpdate = MarketPrice.mock(stockName: "Nintendo", lastPrice: "100", changePercent: "10")
         let streamerSubscription = DataStreamerSubscriptionMock()
-        let dataProvider = streamingDataProvider(streamerSubscription: streamerSubscription)
-        let viewModel = viewModel(dataProvider: dataProvider)
+        let viewModel = viewModel(streamerSubscription: streamerSubscription)
+        let confirmation = confirmation(comment: "The price update is successfully published")
+        
         #expect(viewModel.marketList.count == 0)
-        
         viewModel.startStreaming()
-        await confirmation(expectedCount: 2) { confirm in
-            viewModel.$markets.sink(receiveValue: { marketPrice in
-                confirm()
-            }).store(in: &subscriptions)
-            streamerSubscription.publish(marketPriceUpdate)
-        }
+        viewModel.$markets.dropFirst().receive(on: DispatchQueue.main).sink(receiveValue: { marketPrice in
+            confirmation.fulfill()
+        }).store(in: &self.subscriptions)
+        streamerSubscription.publish(marketPriceUpdate)
+        await completion(confirmation: confirmation)
         
-        #expect(viewModel.marketList.count == 1)
-        #expect(viewModel.marketList.first?.stockName == "Nintendo")
-        #expect(viewModel.marketList.first?.lastPrice == "100")
-        #expect(viewModel.marketList.first?.changePercent == "10")
+        try #require(viewModel.marketList.count == 1)
+        #expect(viewModel.marketList[0].stockName == "Nintendo")
+        #expect(viewModel.marketList[0].lastPrice == "100")
+        #expect(viewModel.marketList[0].changePercent == "10")
     }
     
     @Test func marketsSortedAlphabetically() async throws {}
