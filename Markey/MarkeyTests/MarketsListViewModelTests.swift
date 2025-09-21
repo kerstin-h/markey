@@ -19,45 +19,33 @@ extension Tag {
 @Suite("Market List",
        .tags(.marketList))
 final class MarketsListViewModelTests: Confirmation {
+    private let viewModel: MarketsListViewModel
+    private let streamerSubscription = DataStreamerSubscriptionMock()
     private var subscriptions = Set<AnyCancellable>()
     
     var confirm: Confirm?
 
+    init() {
+        viewModel = Self.viewModel(with: streamerSubscription)
+    }
+
     // MARK: Test helpers
 
-    private func viewModel(streamerSubscription: DataStreamerSubscriptionMock) -> MarketsListViewModel {
-        let dataProvider = streamingDataProvider(streamerSubscription: streamerSubscription)
+    private static func viewModel(with streamerSubscription: DataStreamerSubscriptionMock) -> MarketsListViewModel {
+        let streamingService = DataStreamingServiceMock(streamerSubscription: streamerSubscription)
+        let dataProvider = MarketStreamingDataProvider(streamingService: streamingService)
         return MarketsListViewModel(streamingDataProvider: dataProvider)
     }
-    
-    private func streamingDataProvider(streamerSubscription: DataStreamerSubscriptionMock = DataStreamerSubscriptionMock()) -> MarketStreamingDataProvider {
-        let streamingService = DataStreamingServiceMock(streamerSubscription: streamerSubscription)
-        return MarketStreamingDataProvider(streamingService: streamingService)
-    }
-    
-    private func viewModelWithStreamingUpdates(_ marketPrices: [MarketPrice]) async -> MarketsListViewModel {
-        let streamerSubscription = DataStreamerSubscriptionMock()
-        let viewModel = viewModel(streamerSubscription: streamerSubscription)
 
-        #expect(viewModel.marketList.count == 0)
-        viewModel.startStreaming()
-        await sendStreamingUpdate(viewModel: viewModel,
-                                  streamerSubscription: streamerSubscription,
-                                  marketPrices: marketPrices)
-        return viewModel
-    }
-
-    private func sendStreamingUpdate(viewModel: MarketsListViewModel,
-                                     streamerSubscription: DataStreamerSubscriptionMock,
-                                     marketPrices: [MarketPrice]) async {
+    private func sendStreamingUpdate(marketPrices: [MarketPrice]) async {
         confirm = newConfirm()
         subscriptions.removeAll()
         await confirmation(expectedCount: marketPrices.count) {
-            viewModel.$markets.dropFirst().receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] marketPrice in
+            self.viewModel.$markets.dropFirst().receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] marketPrice in
                 self?.confirm()
             }).store(in: &self.subscriptions)
             for index in 0..<marketPrices.count {
-                streamerSubscription.publish(marketPrices[index])
+                self.streamerSubscription.publish(marketPrices[index])
             }
         }
     }
@@ -69,8 +57,10 @@ final class MarketsListViewModelTests: Confirmation {
     func startStreamingBeginsUpdates() async throws {
         let marketPriceUpdate = MarketPrice(stockName: "Nintendo", lastPrice: "100", changePercent: "10")
         
-        let viewModel = await viewModelWithStreamingUpdates([marketPriceUpdate])
-        
+        #expect(viewModel.marketList.count == 0)
+        viewModel.startStreaming()
+        await sendStreamingUpdate(marketPrices: [marketPriceUpdate])
+
         let firstMarket = try #require(viewModel.marketList.first)
         #expect(firstMarket.stockName == "Nintendo")
         #expect(firstMarket.lastPrice == "100")
@@ -86,8 +76,10 @@ final class MarketsListViewModelTests: Confirmation {
             MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "-10")
         ]
         
-        let viewModel = await viewModelWithStreamingUpdates(marketPriceUpdates)
-        
+        #expect(viewModel.marketList.count == 0)
+        viewModel.startStreaming()
+        await sendStreamingUpdate(marketPrices: marketPriceUpdates)
+
         try #require(viewModel.marketList.count == 3)
         #expect(viewModel.marketList[0] == MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "-10"))
         #expect(viewModel.marketList[1] == MarketPrice(stockName: "Mushroom", lastPrice: "1000", changePercent: "1"))
@@ -103,23 +95,17 @@ final class MarketsListViewModelTests: Confirmation {
             MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "-10")
         ]
         let marketPriceUpdate = MarketPrice(stockName: "Key", lastPrice: "13", changePercent: "-1")
-        let streamerSubscription = DataStreamerSubscriptionMock()
-        let viewModel = viewModel(streamerSubscription: streamerSubscription)
 
         #expect(viewModel.marketList.count == 0)
         viewModel.startStreaming()
-        await sendStreamingUpdate(viewModel: viewModel,
-                                  streamerSubscription: streamerSubscription,
-                                  marketPrices: marketPrices)
+        await sendStreamingUpdate(marketPrices: marketPrices)
 
         try #require(viewModel.marketList.count == 3)
         #expect(viewModel.marketList[0] == MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "-10"))
         #expect(viewModel.marketList[1] == MarketPrice(stockName: "Mushroom", lastPrice: "1000", changePercent: "1"))
         #expect(viewModel.marketList[2] == MarketPrice(stockName: "Star", lastPrice: "100", changePercent: "5"))
 
-        await sendStreamingUpdate(viewModel: viewModel,
-                                  streamerSubscription: streamerSubscription,
-                                  marketPrices: [marketPriceUpdate])
+        await sendStreamingUpdate(marketPrices: [marketPriceUpdate])
 
         try #require(viewModel.marketList.count == 4)
         #expect(viewModel.marketList[0] == MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "-10"))
