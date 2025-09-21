@@ -42,8 +42,9 @@ final class MarketsListViewModelTests: Confirmation {
         return MarketsListViewModel(streamingDataProvider: dataProvider)
     }
 
-    private func sendStreamingUpdate(marketPrices: [MarketPrice]) async {
-        confirm = newConfirm()
+    private func sendStreamingUpdate(marketPrices: [MarketPrice],
+                                     expectSuccessful: Bool = true) async {
+        confirm = newConfirm(isInverted: !expectSuccessful)
         subscriptions.removeAll()
         await confirmation(expectedCount: marketPrices.count) {
             self.viewModel.$markets.dropFirst().receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] marketPrice in
@@ -167,7 +168,7 @@ final class MarketsListViewModelTests: Confirmation {
                 ]
             )
           ])
-    func marketPricesUpdateCorrectlyForMarket(priceUpdates: TestData<[MarketPrice]>) async throws {
+    func marketPricesUpdateCorrectlyForMarket(for priceUpdates: TestData<[MarketPrice]>) async throws {
         let marketPrices = [
             MarketPrice(stockName: "Mushroom", lastPrice: "1000", changePercent: "1"),
             MarketPrice(stockName: "Star", lastPrice: "100", changePercent: "5"),
@@ -190,6 +191,31 @@ final class MarketsListViewModelTests: Confirmation {
     }
 
     @Test("Stop streaming behaves correctly",
-          .tags(.streamingUpdates))
-    func stopStreaming() async throws {}
+          .tags(.streamingUpdates),
+          arguments: [[
+            TestData( // update #1
+                inputData: [MarketPrice(stockName: "Nintendo", lastPrice: "100", changePercent: "10")],
+                expectedResult: [MarketPrice(stockName: "Nintendo", lastPrice: "100", changePercent: "10")]
+            ),
+            TestData( // update #2
+                inputData: [MarketPrice(stockName: "Sega", lastPrice: "100", changePercent: "10")],
+                expectedResult: [MarketPrice(stockName: "Nintendo", lastPrice: "100", changePercent: "10")]
+            )
+          ]])
+    func stopStreaming(for priceUpdates: [TestData<[MarketPrice]>]) async throws {
+        #expect(viewModel.marketList.count == 0)
+        viewModel.startStreaming()
+
+        await sendStreamingUpdate(marketPrices: priceUpdates[0].inputData)
+
+        try #require(viewModel.marketList.count == priceUpdates[0].expectedResult.count)
+        #expect(viewModel.marketList == priceUpdates[0].expectedResult)
+
+        viewModel.stopStreaming()
+        await sendStreamingUpdate(marketPrices: priceUpdates[1].inputData,
+                                  expectSuccessful: false)
+
+        try #require(viewModel.marketList.count == priceUpdates[1].expectedResult.count)
+        #expect(viewModel.marketList == priceUpdates[1].expectedResult)
+    }
 }
