@@ -21,16 +21,17 @@ final class MarketsListViewModel: ObservableObject {
     
     init(streamingDataProvider: MarketStreamingDataProvider) {
         self.streamingDataProvider = streamingDataProvider
-        streamingDataProvider.marketPricesPublisher.receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] marketPrice in
-            self?.markets[marketPrice.stockName] = marketPrice
-        }).store(in: &subscriptions)
     }
 
     func startStreaming() {
+        streamingDataProvider.marketPricesPublisher.receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] marketPrice in
+            self?.markets[marketPrice.stockName] = marketPrice
+        }).store(in: &subscriptions)
         streamingDataProvider.startStreaming()
     }
 
     func stopStreaming() {
         streamingDataProvider.stopStreaming()
+        subscriptions.removeAll()
     }
 }

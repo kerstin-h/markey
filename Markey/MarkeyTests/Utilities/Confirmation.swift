@@ -9,7 +9,7 @@ import XCTest
 
 /// wraps XCTestExpectation in Swift Testing style confirmation since await confirmation() does not currently work reliably with combine
 protocol Confirmation: AnyObject {
-    var confirm: Confirm { get }
+    var confirm: Confirm? { get }
 }
 
 extension Confirmation {
@@ -18,14 +18,16 @@ extension Confirmation {
     }
 
     func confirm() {
-        confirm.fulfill()
+        confirm?.fulfill()
     }
 
-    func confirmation(body: @escaping () -> Void) async {
+    func confirmation(expectedCount: Int = 1,
+                      body: @escaping () -> Void) async {
         guard let confirm = confirm as? XCTestExpectation else {
             XCTFail("Test is misconfigured, expected XCTestExpectation")
             return
         }
+        confirm.expectedFulfillmentCount = expectedCount
         body()
         await XCTWaiter().fulfillment(of: [confirm], timeout: 1.0)
     }

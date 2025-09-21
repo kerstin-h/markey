@@ -35,6 +35,7 @@ class MarketStreamingDataProvider {
     
     func stopStreaming() {
         streamerSubscription?.unsubscribe()
+        priceSubscriptions.removeAll()
     }
     
     private func subscribe() -> DataStreamerSubscriptionProtocol {
