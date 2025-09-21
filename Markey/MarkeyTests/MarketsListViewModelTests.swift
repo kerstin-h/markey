@@ -68,7 +68,6 @@ final class MarketsListViewModelTests: Confirmation {
     func startStreamingBeginsUpdates(for priceUpdate: TestData<MarketPrice>) async throws {
         #expect(viewModel.marketList.count == 0)
         viewModel.startStreaming()
-
         await sendStreamingUpdate(marketPrices: [priceUpdate.inputData])
 
         let firstMarket = try #require(viewModel.marketList.first)
@@ -93,13 +92,10 @@ final class MarketsListViewModelTests: Confirmation {
     func marketsSortedAlphabetically(for priceUpdates: TestData<[MarketPrice]>) async throws {
         #expect(viewModel.marketList.count == 0)
         viewModel.startStreaming()
-
         await sendStreamingUpdate(marketPrices: priceUpdates.inputData)
 
         try #require(viewModel.marketList.count == priceUpdates.expectedResult.count)
-        for index in 0..<priceUpdates.expectedResult.count {
-            #expect(viewModel.marketList[index] == priceUpdates.expectedResult[index])
-        }
+        #expect(viewModel.marketList == priceUpdates.expectedResult)
     }
     
     @Test("Markets display alphabetically after multiple updates",
@@ -131,20 +127,15 @@ final class MarketsListViewModelTests: Confirmation {
     func marketUpdatesSortedAlphabetically(for multiplePriceUpdates: [TestData<[MarketPrice]>]) async throws {
         #expect(viewModel.marketList.count == 0)
         viewModel.startStreaming()
-
         await sendStreamingUpdate(marketPrices: multiplePriceUpdates[0].inputData)
 
         try #require(viewModel.marketList.count == multiplePriceUpdates[0].expectedResult.count)
-        for index in 0..<multiplePriceUpdates[0].expectedResult.count {
-            #expect(viewModel.marketList[index] == multiplePriceUpdates[0].expectedResult[index])
-        }
+        #expect(viewModel.marketList == multiplePriceUpdates[0].expectedResult)
 
         await sendStreamingUpdate(marketPrices: multiplePriceUpdates[1].inputData)
 
         try #require(viewModel.marketList.count == multiplePriceUpdates[1].expectedResult.count)
-        for index in 0..<multiplePriceUpdates[1].expectedResult.count {
-            #expect(viewModel.marketList[index] == multiplePriceUpdates[1].expectedResult[index])
-        }
+        #expect(viewModel.marketList == multiplePriceUpdates[1].expectedResult)
     }
 
     @Test("Markets prices update values correctly on update",
@@ -185,7 +176,6 @@ final class MarketsListViewModelTests: Confirmation {
 
         #expect(viewModel.marketList.count == 0)
         viewModel.startStreaming()
-
         await sendStreamingUpdate(marketPrices: marketPrices)
 
         try #require(viewModel.marketList.count == 3)
@@ -196,9 +186,7 @@ final class MarketsListViewModelTests: Confirmation {
         await sendStreamingUpdate(marketPrices: priceUpdates.inputData)
 
         try #require(viewModel.marketList.count == priceUpdates.expectedResult.count)
-        for index in 0..<priceUpdates.expectedResult.count {
-            #expect(viewModel.marketList[index] == priceUpdates.expectedResult[index])
-        }
+        #expect(viewModel.marketList == priceUpdates.expectedResult)
     }
 
     @Test("Stop streaming behaves correctly",
