@@ -114,9 +114,63 @@ final class MarketsListViewModelTests: Confirmation {
         #expect(viewModel.marketList[3] == MarketPrice(stockName: "Star", lastPrice: "100", changePercent: "5"))
     }
 
-    @Test("Markets prices update correctly",
-          .tags(.streamingUpdates))
-    func marketPricesUpdateCorrectlyForMarket() async throws {}
+    struct PriceUpdates {
+        let marketPrices: [MarketPrice]
+        let sortedMarketPrices: [MarketPrice]
+    }
+
+    @Test("Markets prices update correctly on update",
+          .tags(.streamingUpdates),
+          arguments: [
+            PriceUpdates(
+                marketPrices: [
+                    MarketPrice(stockName: "Mushroom", lastPrice: "1000", changePercent: "1"),
+                    MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "-10"),
+                    MarketPrice(stockName: "Star", lastPrice: "100", changePercent: "50")
+                ],
+                sortedMarketPrices: [
+                    MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "-10"),
+                    MarketPrice(stockName: "Mushroom", lastPrice: "1000", changePercent: "1"),
+                    MarketPrice(stockName: "Star", lastPrice: "100", changePercent: "50")
+                ]),
+            PriceUpdates(
+                marketPrices: [
+                    MarketPrice(stockName: "Mushroom", lastPrice: "888", changePercent: "1"),
+                    MarketPrice(stockName: "Star", lastPrice: "100", changePercent: "5"),
+                    MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "50"),
+                    MarketPrice(stockName: "Key", lastPrice: "13", changePercent: "-1")
+                ],
+                sortedMarketPrices: [
+                    MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "50"),
+                    MarketPrice(stockName: "Key", lastPrice: "13", changePercent: "-1"),
+                    MarketPrice(stockName: "Mushroom", lastPrice: "888", changePercent: "1"),
+                    MarketPrice(stockName: "Star", lastPrice: "100", changePercent: "5")
+                ]
+            )
+          ])
+    func marketPricesUpdateCorrectlyForMarket(priceUpdates: PriceUpdates) async throws {
+        let marketPrices = [
+            MarketPrice(stockName: "Mushroom", lastPrice: "1000", changePercent: "1"),
+            MarketPrice(stockName: "Star", lastPrice: "100", changePercent: "5"),
+            MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "-10")
+        ]
+
+        #expect(viewModel.marketList.count == 0)
+        viewModel.startStreaming()
+        await sendStreamingUpdate(marketPrices: marketPrices)
+
+        try #require(viewModel.marketList.count == 3)
+        #expect(viewModel.marketList[0] == MarketPrice(stockName: "Flower", lastPrice: "134", changePercent: "-10"))
+        #expect(viewModel.marketList[1] == MarketPrice(stockName: "Mushroom", lastPrice: "1000", changePercent: "1"))
+        #expect(viewModel.marketList[2] == MarketPrice(stockName: "Star", lastPrice: "100", changePercent: "5"))
+
+        await sendStreamingUpdate(marketPrices: priceUpdates.marketPrices)
+
+        try #require(viewModel.marketList.count == priceUpdates.marketPrices.count)
+        for index in 0..<priceUpdates.marketPrices.count {
+            #expect(viewModel.marketList[index] == priceUpdates.sortedMarketPrices[index])
+        }
+    }
 
     @Test("Stop streaming behaves correctly",
           .tags(.streamingUpdates))
