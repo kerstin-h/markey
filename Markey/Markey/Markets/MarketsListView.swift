@@ -59,6 +59,7 @@ struct MarketsListView: View {
                             Text(market.lastPrice)
                             Text(market.changePercent)
                         }
+                        .font(.system(size: 15))
                     }
                 }
             }
@@ -71,6 +72,9 @@ struct MarketsListView: View {
             Text("Stock Price")
             Text("Change")
         }
+        .font(.system(size: 12))
+        .foregroundColor(.gray)
+        .padding(.top, 12)
     }
 }
 
