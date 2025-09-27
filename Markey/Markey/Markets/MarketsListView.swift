@@ -11,7 +11,13 @@ import SwiftData
 struct MarketsListView: View {
     @Environment(\.scenePhase) private var scenePhase
     @ObservedObject private var viewModel: MarketsListViewModel
-    
+
+    private let columns = [
+        GridItem(.flexible(), alignment: .leading),
+        GridItem(.flexible(), alignment: .trailing),
+        GridItem(.flexible(), alignment: .trailing)
+    ]
+
     init(viewModel: MarketsListViewModel) {
         self.viewModel = viewModel
     }
@@ -19,18 +25,8 @@ struct MarketsListView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .center, spacing: .zero) {
-                List {
-                    Section(header: header) {
-                        ForEach(viewModel.marketList, id: \.stockName) { market in
-                            HStack(spacing: 12) {
-                                Text(market.stockName)
-                                Spacer()
-                                Text(market.lastPrice)
-                                Text(market.changePercent)
-                            }
-                        }
-                    }
-                }
+                marketsList
+                    .padding(.horizontal, 16)
                 Divider()
                 Text("*Data based on a questionable sample of Lightstreamer demo stocks.")
                     .font(.system(size: 12))
@@ -52,11 +48,26 @@ struct MarketsListView: View {
             }
         }
     }
-    
-    private var header: some View {
-        HStack(spacing: 12) {
+
+    private var marketsList: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: .zero) {
+                LazyVGrid(columns: columns, spacing: 12) {
+                    Section(header: marketsHeader) {
+                        ForEach(viewModel.marketList, id: \.stockName) { market in
+                            Text(market.stockName)
+                            Text(market.lastPrice)
+                            Text(market.changePercent)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var marketsHeader: some View {
+        LazyVGrid(columns: columns) {
             Text("Market Name")
-            Spacer()
             Text("Stock Price")
             Text("Change")
         }
