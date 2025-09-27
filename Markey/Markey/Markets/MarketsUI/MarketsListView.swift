@@ -54,10 +54,8 @@ struct MarketsListView: View {
             VStack(alignment: .leading, spacing: .zero) {
                 LazyVGrid(columns: columns, spacing: 12) {
                     Section(header: marketsHeader) {
-                        ForEach(viewModel.marketList, id: \.stockName) { market in
-                            Text(market.stockName)
-                            Text(market.lastPrice)
-                            Text(market.changePercent)
+                        ForEach(viewModel.marketRowViewModels, id: \.stockName) { marketRow in
+                            MarketRow(marketRow)
                         }
                         .font(.system(size: 15))
                     }

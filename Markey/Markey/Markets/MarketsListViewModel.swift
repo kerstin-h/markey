@@ -9,13 +9,8 @@ import Foundation
 import Combine
 
 final class MarketsListViewModel: ObservableObject {
-    @Published private(set) var markets = [String: MarketPrice]()
+    @Published private(set) var marketRowViewModels = [MarketRowViewModel]()
 
-    public var marketList: [MarketPrice] {
-        let marketList = markets.sorted(by: { $0.key < $1.key })
-        return marketList.map { $0.value }
-    }
-    
     private let streamingDataProvider: MarketStreamingDataProvider
     private var subscriptions = Set<AnyCancellable>()
     
@@ -23,9 +18,22 @@ final class MarketsListViewModel: ObservableObject {
         self.streamingDataProvider = streamingDataProvider
     }
 
+    private func addPriceUpdate(marketPrice: MarketPrice) {
+        if let viewModel = viewModel(for: marketPrice.stockName) {
+            viewModel.price = Price(lastPrice: marketPrice.lastPrice, changePercent: marketPrice.changePercent)
+        } else {
+            marketRowViewModels.append(MarketRowViewModel(marketPrice: marketPrice))
+            marketRowViewModels.sort(by: { $0.stockName < $1.stockName })
+        }
+    }
+
+    private func viewModel(for stockName: String) -> MarketRowViewModel? {
+        marketRowViewModels.first(where: { $0.stockName == stockName })
+    }
+
     func startStreaming() {
         streamingDataProvider.marketPricesPublisher.receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] marketPrice in
-            self?.markets[marketPrice.stockName] = marketPrice
+            self?.addPriceUpdate(marketPrice: marketPrice)
         }).store(in: &subscriptions)
         streamingDataProvider.startStreaming()
     }

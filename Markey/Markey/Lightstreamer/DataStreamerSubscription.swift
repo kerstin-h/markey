@@ -50,10 +50,8 @@ extension DataStreamerSubscription: SubscriptionDelegate {
             return
         }
         
-        let priceUpdate = MarketPrice(stockName: stockName,
-                                      lastPrice: lastPrice,
-                                      changePercent: changePercent)
-        
+        let priceUpdate = MarketPrice(stockName: stockName, lastPrice: lastPrice, changePercent: changePercent)
+
         Task { @MainActor in
             self.dataPublisher.send(priceUpdate)
         }
