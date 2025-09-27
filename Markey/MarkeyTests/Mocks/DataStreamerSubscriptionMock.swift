@@ -10,15 +10,15 @@ import Combine
 
 final class DataStreamerSubscriptionMock: DataStreamerSubscriptionProtocol {
     private let dataPublisher = PassthroughSubject<MarketPrice, Never>()
-    var streamingDataPublisher: AnyPublisher<Markey.MarketPrice, Never> {
+    lazy var streamingDataPublisher: AnyPublisher<Markey.MarketPrice, Never> = {
         dataPublisher.eraseToAnyPublisher()
-    }
+    }()
     
     func publish(_ data: MarketPrice) {
         dataPublisher.send(data)
     }
     
-    func subscribe() { }
+    func subscribe() {}
     
-    func unsubscribe() { }
+    func unsubscribe() {}
 }

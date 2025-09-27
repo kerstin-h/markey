@@ -34,7 +34,9 @@ extension Confirmation {
         guard let confirm = confirm as? XCTestExpectation else {
             return
         }
-        confirm.expectedFulfillmentCount = expectedCount
+        if confirm.expectedFulfillmentCount != expectedCount {
+            confirm.expectedFulfillmentCount = expectedCount
+        }
         body()
         await XCTWaiter().fulfillment(of: [confirm], timeout: 1.0)
     }

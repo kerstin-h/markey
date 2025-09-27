@@ -17,9 +17,9 @@ class MarketStreamingDataProvider {
     private var priceSubscriptions = Set<AnyCancellable>()
     private var streamerSubscription: DataStreamerSubscriptionProtocol?
     
-    var marketPricesPublisher: AnyPublisher<MarketPrice, Never> {
+    lazy var marketPricesPublisher: AnyPublisher<MarketPrice, Never> = {
         pricesPublisher.eraseToAnyPublisher()
-    }
+    }()
     
     init(streamingService: DataStreamingServiceProtocol) {
         self.streamingService = streamingService
@@ -27,22 +27,17 @@ class MarketStreamingDataProvider {
     
     func startStreaming() {
         if streamerSubscription == nil {
-            streamerSubscription = subscribe()
+            streamerSubscription = streamingService.newSubscription()
         }
         guard let streamerSubscription else { return }
+        streamerSubscription.streamingDataPublisher.receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] priceUpdate in
+            self?.pricesPublisher.send(priceUpdate)
+        }).store(in: &priceSubscriptions)
         streamingService.startStreaming(subscription: streamerSubscription)
     }
     
     func stopStreaming() {
         streamerSubscription?.unsubscribe()
         priceSubscriptions.removeAll()
-    }
-    
-    private func subscribe() -> DataStreamerSubscriptionProtocol {
-        let streamerSubscription = streamingService.newSubscription()
-        streamerSubscription.streamingDataPublisher.receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] priceUpdate in
-            self?.pricesPublisher.send(priceUpdate)
-        }).store(in: &priceSubscriptions)
-        return streamerSubscription
     }
 }
