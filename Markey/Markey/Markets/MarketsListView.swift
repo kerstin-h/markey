@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct MarketsListView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @ObservedObject private var viewModel: MarketsListViewModel
     
     init(viewModel: MarketsListViewModel) {
@@ -41,11 +42,14 @@ struct MarketsListView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .ignoresSafeArea()
-        .onAppear {
-            viewModel.startStreaming()
-        }
-        .onDisappear {
-            viewModel.stopStreaming()
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .active:
+                viewModel.startStreaming()
+            case .inactive, .background:
+                viewModel.stopStreaming()
+            @unknown default: break
+            }
         }
     }
     

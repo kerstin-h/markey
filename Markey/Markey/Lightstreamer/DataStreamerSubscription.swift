@@ -59,26 +59,28 @@ extension DataStreamerSubscription: SubscriptionDelegate {
         }
     }
 
-    func subscription(_ subscription: LSSubscription, didClearSnapshotForItemName itemName: String?, itemPos: UInt) { }
+    func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?) {
+        print("Lightstreamer subscription: \(subscription) failed.")
+    }
+
+    func subscription(_ subscription: LSSubscription, didClearSnapshotForItemName itemName: String?, itemPos: UInt) {}
+
+    func subscription(_ subscription: LSSubscription, didLoseUpdates lostUpdates: UInt, forCommandSecondLevelItemWithKey key: String) {}
     
-    func subscription(_ subscription: LSSubscription, didLoseUpdates lostUpdates: UInt, forCommandSecondLevelItemWithKey key: String) { }
+    func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?, forCommandSecondLevelItemWithKey key: String) {}
     
-    func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?, forCommandSecondLevelItemWithKey key: String) { }
+    func subscription(_ subscription: LSSubscription, didEndSnapshotForItemName itemName: String?, itemPos: UInt) {}
     
-    func subscription(_ subscription: LSSubscription, didEndSnapshotForItemName itemName: String?, itemPos: UInt) { }
+    func subscription(_ subscription: LSSubscription, didLoseUpdates lostUpdates: UInt, forItemName itemName: String?, itemPos: UInt) {}
     
-    func subscription(_ subscription: LSSubscription, didLoseUpdates lostUpdates: UInt, forItemName itemName: String?, itemPos: UInt) { }
+    func subscriptionDidRemoveDelegate(_ subscription: LSSubscription) {}
     
-    func subscriptionDidRemoveDelegate(_ subscription: LSSubscription) { }
+    func subscriptionDidAddDelegate(_ subscription: LSSubscription) {}
     
-    func subscriptionDidAddDelegate(_ subscription: LSSubscription) { }
+    func subscriptionDidSubscribe(_ subscription: LSSubscription) {}
     
-    func subscriptionDidSubscribe(_ subscription: LSSubscription) { }
+    func subscriptionDidUnsubscribe(_ subscription: LSSubscription) {}
     
-    func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?) { }
-    
-    func subscriptionDidUnsubscribe(_ subscription: LSSubscription) { }
-    
-    func subscription(_ subscription: LSSubscription, didReceiveRealFrequency frequency: RealMaxFrequency?) { }
+    func subscription(_ subscription: LSSubscription, didReceiveRealFrequency frequency: RealMaxFrequency?) {}
 }
 
