@@ -9,15 +9,19 @@ import Combine
 @testable import Markey
 
 final class DataStreamerSubscriptionMock: DataStreamerSubscriptionProtocol {
-    private let dataPublisher = PassthroughSubject<MarketPrice, Never>()
-    lazy var streamingDataPublisher: AnyPublisher<Markey.MarketPrice, Never> = {
+    private let dataPublisher = PassthroughSubject<MarketPrice, StreamingError>()
+    lazy var streamingDataPublisher: AnyPublisher<MarketPrice, StreamingError> = {
         dataPublisher.eraseToAnyPublisher()
     }()
     
     func publish(_ data: MarketPrice) {
         dataPublisher.send(data)
     }
-    
+
+    func publish(_ error: StreamingError) {
+        dataPublisher.send(completion: .failure(error))
+    }
+
     func subscribe() {}
     
     func unsubscribe() {}

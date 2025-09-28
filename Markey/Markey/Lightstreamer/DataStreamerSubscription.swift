@@ -8,19 +8,23 @@
 import Combine
 import LightstreamerClient
 
+enum StreamingError: Error {
+    case subscriptionFailure(code: Int, message: String?)
+}
+
 protocol DataStreamerSubscriptionProtocol {
-    var streamingDataPublisher: AnyPublisher<MarketPrice, Never> { get }
-    
+    var streamingDataPublisher: AnyPublisher<MarketPrice, StreamingError> { get }
+
     func subscribe()
     func unsubscribe()
 }
 
 final class DataStreamerSubscription: DataStreamerSubscriptionProtocol {
     private weak var client: LightstreamerClientProtocol?
-    private let dataPublisher = PassthroughSubject<MarketPrice, Never>()
+    private let dataPublisher = PassthroughSubject<MarketPrice, StreamingError>()
     private let subscription: LSSubscription
     
-    lazy var streamingDataPublisher: AnyPublisher<MarketPrice, Never> = {
+    lazy var streamingDataPublisher: AnyPublisher<MarketPrice, StreamingError> = {
         dataPublisher.eraseToAnyPublisher()
     }()
     
@@ -58,7 +62,8 @@ extension DataStreamerSubscription: SubscriptionDelegate {
     }
 
     func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?) {
-        print("Lightstreamer subscription: \(subscription) failed.")
+        let error = StreamingError.subscriptionFailure(code: code, message: message)
+        self.dataPublisher.send(completion: .failure(error))
     }
 
     func subscription(_ subscription: LSSubscription, didClearSnapshotForItemName itemName: String?, itemPos: UInt) {}

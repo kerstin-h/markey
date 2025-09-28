@@ -9,15 +9,19 @@
 import Foundation
 import Combine
 
+enum MarketError : Error{
+    case streamingFailed
+}
+
 class MarketStreamingDataProvider {
-    private let pricesPublisher = PassthroughSubject<MarketPrice, Never>()
-    
+    private let pricesPublisher = PassthroughSubject<MarketPrice, MarketError>()
+
     private let streamingService: DataStreamingServiceProtocol
     
     private var priceSubscriptions = Set<AnyCancellable>()
     private var streamerSubscription: DataStreamerSubscriptionProtocol?
     
-    lazy var marketPricesPublisher: AnyPublisher<MarketPrice, Never> = {
+    lazy var marketPricesPublisher: AnyPublisher<MarketPrice, MarketError> = {
         pricesPublisher.eraseToAnyPublisher()
     }()
     
@@ -30,7 +34,11 @@ class MarketStreamingDataProvider {
             streamerSubscription = streamingService.newSubscription()
         }
         guard let streamerSubscription else { return }
-        streamerSubscription.streamingDataPublisher.receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] priceUpdate in
+        streamerSubscription.streamingDataPublisher.receive(on: DispatchQueue.main).sink(receiveCompletion: { [weak self] completion in
+            if case let .failure(error) = completion {
+                self?.pricesPublisher.send(completion: .failure(MarketError.streamingFailed))
+            }
+        }, receiveValue: { [weak self] priceUpdate in
             self?.pricesPublisher.send(priceUpdate)
         }).store(in: &priceSubscriptions)
         streamingService.startStreaming(subscription: streamerSubscription)

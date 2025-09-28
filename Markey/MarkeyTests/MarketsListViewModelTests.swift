@@ -55,6 +55,22 @@ final class MarketsListViewModelTests: Confirmation {
         }
     }
 
+    private func sendStreamingError(_ error: StreamingError) async {
+        subscriptions.removeAll()
+        confirm = newConfirm(isInverted: false)
+        await confirmation(expectedCount: 1) {
+            self.viewModel.$marketRowViewModels
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { [weak self] completion in
+                    if case .failure = completion {
+                        self?.confirm()
+                    }
+                }, receiveValue: { _ in }
+            ).store(in: &self.subscriptions)
+            self.streamerSubscription.publish(error)
+        }
+    }
+
     // MARK: Tests
 
     @Test("Start streaming begins price updates",
@@ -75,6 +91,17 @@ final class MarketsListViewModelTests: Confirmation {
         let firstMarket = try #require(viewModel.marketRowViewModels.first)
         #expect(firstMarket == priceUpdate.expectedResult,
                 "Market list should display \(priceUpdate.description) after streaming is started")
+    }
+
+    @Test("Start streaming failure shows alert",
+          .tags(.streamingUpdates))
+    func startStreamingFailureShowsAlert() async throws {
+        #expect(viewModel.showAlert == false,
+                "Market list should not show alert by default")
+        viewModel.startStreaming()
+        await sendStreamingError(.subscriptionFailure(code: 1, message: nil))
+        #expect(viewModel.showAlert == true,
+                "Market list should show error alert on streaming failure")
     }
 
     @Test("Markets display alphabetically",

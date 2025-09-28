@@ -37,6 +37,11 @@ struct MarketsListView: View {
             .navigationTitle("Popular Markets*")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .alert("Error occured", isPresented: $viewModel.showAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Cannot retrieve market data.")
+        }
         .ignoresSafeArea()
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {

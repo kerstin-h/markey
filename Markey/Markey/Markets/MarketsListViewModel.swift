@@ -10,6 +10,7 @@ import Combine
 
 final class MarketsListViewModel: ObservableObject {
     @Published private(set) var marketRowViewModels = [MarketRowViewModel]()
+    @Published var showAlert = false
 
     private let streamingDataProvider: MarketStreamingDataProvider
     private var subscriptions = Set<AnyCancellable>()
@@ -32,9 +33,15 @@ final class MarketsListViewModel: ObservableObject {
     }
 
     func startStreaming() {
-        streamingDataProvider.marketPricesPublisher.receive(on: DispatchQueue.main).sink(receiveValue: { [weak self] marketPrice in
-            self?.addPriceUpdate(marketPrice: marketPrice)
-        }).store(in: &subscriptions)
+        streamingDataProvider.marketPricesPublisher
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { [weak self] completion in
+                if case .failure = completion {
+                    self?.showAlert = true
+                }
+            }, receiveValue: { [weak self] marketPrice in
+                self?.addPriceUpdate(marketPrice: marketPrice)
+            }).store(in: &subscriptions)
         streamingDataProvider.startStreaming()
     }
 
