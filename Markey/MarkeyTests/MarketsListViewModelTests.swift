@@ -79,7 +79,7 @@ final class MarketsListViewModelTests: Confirmation {
             TestData(
                 inputData: MarketPrice(stockName: "Nintendo", lastPrice: "100", changePercent: "10"),
                 expectedResult: MarketRowViewModel(stockName: "Nintendo", lastPrice: "100", changePercent: "10"),
-                description: "Price update"
+                description: "Market price update"
             )
           ])
     func startStreamingBeginsUpdates(for priceUpdate: TestData<MarketPrice, MarketRowViewModel>) async throws {
@@ -118,7 +118,7 @@ final class MarketsListViewModelTests: Confirmation {
                     MarketRowViewModel(stockName: "Mushroom", lastPrice: "1000", changePercent: "1"),
                     MarketRowViewModel(stockName: "Star", lastPrice: "100", changePercent: "5")
                 ],
-                description: "Market updates"
+                description: "Market price updates"
             )
           ])
     func marketsSortedAlphabetically(for priceUpdates: TestData<[MarketPrice], [MarketRowViewModel]>) async throws {
@@ -193,7 +193,7 @@ final class MarketsListViewModelTests: Confirmation {
                     MarketRowViewModel(stockName: "Mushroom", lastPrice: "1000", changePercent: "1"),
                     MarketRowViewModel(stockName: "Star", lastPrice: "100", changePercent: "50")
                 ],
-                description: "Test scenario #1"
+                description: "Test #1 - for same number of rows"
             ),
             TestData(
                 inputData: [
@@ -208,7 +208,7 @@ final class MarketsListViewModelTests: Confirmation {
                     MarketRowViewModel(stockName: "Mushroom", lastPrice: "888", changePercent: "1"),
                     MarketRowViewModel(stockName: "Star", lastPrice: "100", changePercent: "5")
                 ],
-                description: "Test scenario #2"
+                description: "Test #2 - for additional rows"
             )
           ])
     func marketPricesUpdateCorrectlyForMarket(for priceUpdates: TestData<[MarketPrice], [MarketRowViewModel]>) async throws {
