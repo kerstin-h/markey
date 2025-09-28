@@ -179,7 +179,7 @@ final class MarketsListViewModelTests: Confirmation {
                 "Market list should display \(priceUpdates[1].description) alphabetically with new markets added")
     }
 
-    @Test("Markets prices update values correctly on update",
+    @Test("Markets prices update values correctly when receive update",
           .tags(.streamingUpdates),
           arguments: [
             TestData(
