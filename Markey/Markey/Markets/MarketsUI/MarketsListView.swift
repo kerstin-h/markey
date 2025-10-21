@@ -23,26 +23,12 @@ struct MarketsListView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .center, spacing: .zero) {
-                marketsList
-                    .padding(.horizontal, 16)
-                Divider()
-                Text("*Data based on a questionable sample of Lightstreamer demo stocks.")
-                    .font(.system(size: 12))
-                    .foregroundColor(.gray)
-                    .padding(.top, 16)
-                    .padding(.horizontal, 16)
-            }
-            .navigationTitle("Popular Markets*")
-            .navigationBarTitleDisplayMode(.inline)
-        }
+        contentView
         .alert("Error occured", isPresented: $viewModel.showAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text("Cannot retrieve market data.")
         }
-        .ignoresSafeArea()
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
@@ -54,15 +40,28 @@ struct MarketsListView: View {
         }
     }
 
+    private var contentView: some View {
+        NavigationStack {
+            VStack(alignment: .center, spacing: .zero) {
+                marketsList
+                    .padding(.horizontal, 16)
+                bottomBanner
+            }
+            .navigationTitle("Popular Stocks")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .ignoresSafeArea()
+    }
+
     private var marketsList: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: .zero) {
-                LazyVGrid(columns: columns, spacing: 12) {
+                LazyVGrid(columns: columns, spacing: .zero) {
                     Section(header: marketsHeader) {
                         ForEach(viewModel.marketRowViewModels, id: \.stockName) { marketRow in
                             MarketRow(marketRow)
                         }
-                        .font(.system(size: 15))
+                        .font(.system(size: 14))
                     }
                 }
             }
@@ -70,14 +69,23 @@ struct MarketsListView: View {
     }
 
     private var marketsHeader: some View {
-        LazyVGrid(columns: columns) {
-            Text("Market Name")
-            Text("Stock Price")
-            Text("Change")
+        LazyVGrid(columns: columns, spacing: .zero) {
+            Text("Market Name".uppercased())
+            Text("Stock Price".uppercased())
+            Text("Change".uppercased())
         }
-        .font(.system(size: 12))
+        .font(.system(size: 13))
         .foregroundColor(.gray)
-        .padding(.top, 12)
+    }
+
+    private var bottomBanner: some View {
+        VStack(spacing: 16) {
+            Divider()
+            Text("*Data based on a questionable sample of Lightstreamer demo stocks.")
+                .font(.system(size: 13))
+                .foregroundColor(.gray)
+                .padding(.horizontal, 16)
+        }
     }
 }
 

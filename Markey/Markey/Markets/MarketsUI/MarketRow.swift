@@ -19,6 +19,7 @@ struct MarketRow: View {
             Text(viewModel.stockName)
             PricesView(viewModel.price)
         }
+        .font(.system(size: 15))
     }
 }
 
@@ -34,5 +35,6 @@ private struct PricesView: View {
             Text(price.lastPrice)
             Text(price.changePercent)
         }
+        .font(.system(size: 15, design: .monospaced))
     }
 }
