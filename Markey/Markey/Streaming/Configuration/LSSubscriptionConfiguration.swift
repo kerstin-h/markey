@@ -19,10 +19,6 @@ enum Fields: String {
     case referencePrice = "ref_price"
     case stockName = "stock_name"
     case time = "time"
-
-    static var allCases: [Fields] {
-        [.ask, .bid, .itemStatus, .lastPrice, .max, .min, .open, .percentChange, .referencePrice, .stockName, .time]
-    }
 }
 
 struct LSSubscriptionConfiguration {

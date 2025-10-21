@@ -11,6 +11,7 @@ import Combine
 @testable import Markey
 
 extension Tag {
+    @Tag static var dataFormatting: Self
     @Tag static var marketList: Self
     @Tag static var sorting: Self
     @Tag static var streamingUpdates: Self
@@ -19,22 +20,24 @@ extension Tag {
 @Suite("Market List",
        .tags(.marketList))
 final class MarketsListViewModelTests: Confirmation {
-    private let viewModel: MarketsListViewModel
+    private var viewModel: MarketsListViewModel
     private let streamerSubscription = DataStreamerSubscriptionMock()
     private var subscriptions = Set<AnyCancellable>()
 
     var confirm: Confirm?
 
     init() {
-        viewModel = Self.viewModel(with: streamerSubscription)
+        viewModel = Self.viewModel(streamerSubscription: streamerSubscription)
     }
 
     // MARK: Test helpers
 
-    private static func viewModel(with streamerSubscription: DataStreamerSubscriptionMock) -> MarketsListViewModel {
+    private static func viewModel(marketRowViewModels: [MarketRowViewModel] = [MarketRowViewModel](),
+                                  streamerSubscription: DataStreamerSubscriptionMock) -> MarketsListViewModel {
         let streamingService = DataStreamingServiceMock(streamerSubscription: streamerSubscription)
         let dataProvider = MarketStreamingDataProvider(streamingService: streamingService)
-        return MarketsListViewModel(streamingDataProvider: dataProvider)
+        return MarketsListViewModel(marketRowViewModels: marketRowViewModels,
+                                    streamingDataProvider: dataProvider)
     }
 
     private func sendStreamingUpdate(marketPrices: [MarketPrice],
@@ -66,7 +69,7 @@ final class MarketsListViewModelTests: Confirmation {
                         self?.confirm()
                     }
                 }, receiveValue: { _ in }
-            ).store(in: &self.subscriptions)
+                ).store(in: &self.subscriptions)
             self.streamerSubscription.publish(error)
         }
     }
@@ -131,7 +134,7 @@ final class MarketsListViewModelTests: Confirmation {
         #expect(viewModel.marketRowViewModels == priceUpdates.expectedResult,
                 "Market list should display \(priceUpdates.description) alphabetically")
     }
-    
+
     @Test("Markets display alphabetically after multiple updates",
           .tags(.sorting, .streamingUpdates),
           arguments: [[
@@ -314,5 +317,17 @@ final class MarketsListViewModelTests: Confirmation {
         try #require(viewModel.marketRowViewModels.count == priceUpdates[2].expectedResult.count)
         #expect(viewModel.marketRowViewModels == priceUpdates[2].expectedResult,
                 "Market list should display \(priceUpdates[2].description) after starting streaming again")
+    }
+
+    @Test("Test data formatted correctly",
+          .tags(.dataFormatting)
+    )
+    func dataFormatting() {
+        let marketRowVMs = [MarketRowViewModel(stockName: "XBox", lastPrice: "100", changePercent: "10")]
+        viewModel = Self.viewModel(marketRowViewModels: marketRowVMs,
+                                   streamerSubscription: streamerSubscription)
+        #expect(viewModel.marketRowViewModels.first?.stockName == "XBox")
+        #expect(viewModel.marketRowViewModels.first?.price.lastPrice == "$100.00")
+        #expect(viewModel.marketRowViewModels.first?.price.changePercent == "10.00%")
     }
 }
