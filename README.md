@@ -8,4 +8,4 @@ This README documents the steps necessary to get the application up and running.
 
 ### How do I get set up? ###
 
-* Markey was developed and tested using XCode 16.4 and iOS 18.6. He is a light mode and dark mode supporter.
+* Markey was developed and tested using XCode 26.0 and iOS 26.0. He is a light mode and dark mode supporter.

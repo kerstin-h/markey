@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 private enum Environment {
     case production

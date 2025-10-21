@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct MarketsListView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -65,6 +64,7 @@ struct MarketsListView: View {
                     }
                 }
             }
+            .padding(.bottom, 4)
         }
     }
 
