@@ -12,9 +12,9 @@ struct MarketsListView: View {
     @ObservedObject private var viewModel: MarketsListViewModel
 
     private let columns = [
-        GridItem(.flexible(), alignment: .leading),
-        GridItem(.flexible(), alignment: .trailing),
-        GridItem(.flexible(), alignment: .trailing)
+        GridItem(.flexible(minimum: 150), alignment: .leading),
+        GridItem(.flexible(minimum: 85), alignment: .trailing),
+        GridItem(.flexible(minimum: 85), alignment: .trailing)
     ]
 
     init(viewModel: MarketsListViewModel) {
@@ -43,11 +43,22 @@ struct MarketsListView: View {
         NavigationStack {
             VStack(alignment: .center, spacing: .zero) {
                 marketsList
-                    .padding(.horizontal, 16)
                 bottomBanner
             }
-            .navigationTitle("Popular Stocks")
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Popular Stocks")
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundStyle(.primary)
+                }
+            }
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [.accentColor, .accentColor.opacity(0.9)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
         }
         .ignoresSafeArea()
     }
@@ -64,8 +75,20 @@ struct MarketsListView: View {
                     }
                 }
             }
+            .padding(.horizontal, 16)
             .padding(.bottom, 4)
         }
+        .background(
+            LinearGradient(
+                colors: [
+                    .accentColor.opacity(0.3),
+                    .accentColor.opacity(0.1),
+                    Color.clear
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 
     private var marketsHeader: some View {
@@ -75,7 +98,8 @@ struct MarketsListView: View {
             Text("Change".uppercased())
         }
         .font(.system(size: 13))
-        .foregroundColor(.gray)
+        .foregroundColor(.accent)
+        .padding(.bottom, 4)
     }
 
     private var bottomBanner: some View {
