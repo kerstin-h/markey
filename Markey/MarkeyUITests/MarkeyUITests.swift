@@ -8,27 +8,28 @@
 import XCTest
 
 final class MarkeyUITests: XCTestCase {
+    private lazy var app: XCUIApplication = XCUIApplication()
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
+        try super.setUpWithError()
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+        app.launch()
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
+    override func tearDownWithError() throws {}
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
+    func testLightstreamerLink() throws {
+        XCTAssert(MarketListUtils.Link.lightstreamer.waitForExistence(timeout: 3), "Lightstreamer link should dislay.")
+        MarketListUtils.Link.lightstreamer.tap()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        XCTAssertTrue(MarketListUtils.Web.safari.wait(for: .runningForeground, timeout: 5), "Safari should be launched after link tapped.")
+        XCTAssertTrue(MarketListUtils.Web.url.waitForExistence(timeout: 3), "A webpage should be displayed.")
+        XCTAssertEqual((MarketListUtils.Web.url.value as? String)?.contains("lightstreamer.com"), true, "Lighstreamer url should be displayed.")
+
+        app.activate()
+        XCTAssertTrue(app.state == .runningForeground, "App should have launched.")
+        XCTAssertTrue(MarketListUtils.Link.lightstreamer.waitForExistence(timeout: 1), "Lightstreamer link should dislay again in app.")
     }
 
     @MainActor

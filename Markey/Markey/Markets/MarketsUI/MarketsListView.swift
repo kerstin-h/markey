@@ -81,10 +81,17 @@ struct MarketsListView: View {
     private var bottomBanner: some View {
         VStack(spacing: 16) {
             Divider()
-            Text("*Data based on a questionable sample of Lightstreamer demo stocks.")
-                .font(.system(size: 13))
-                .foregroundColor(.gray)
-                .padding(.horizontal, 16)
+            Group {
+                Text("*Data based on a questionable sample of ")
+                    .foregroundColor(.gray)
+                + Text("[Lightstreamer](https://www.lightstreamer.com)")
+                    .foregroundColor(.accentColor)
+                    .underline()
+                + Text(" demo stocks.")
+                    .foregroundColor(.gray)
+            }
+            .font(.system(size: 13))
+            .padding(.horizontal, 16)
         }
     }
 }
