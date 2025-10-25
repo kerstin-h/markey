@@ -326,8 +326,11 @@ final class MarketsListViewModelTests: Confirmation {
         let marketRowVMs = [MarketRowViewModel(stockName: "XBox", lastPrice: "100", changePercent: "10")]
         viewModel = Self.viewModel(marketRowViewModels: marketRowVMs,
                                    streamerSubscription: streamerSubscription)
-        #expect(viewModel.marketRowViewModels.first?.stockName == "XBox")
-        #expect(viewModel.marketRowViewModels.first?.price.lastPrice == "$100.00")
-        #expect(viewModel.marketRowViewModels.first?.price.changePercent == "10.00%")
+        #expect(viewModel.marketRowViewModels.first?.stockName == "XBox",
+                "Stock name is incorect.")
+        #expect(viewModel.marketRowViewModels.first?.price.lastPrice == "$100.00",
+                "Last price should be formatted as US currency.")
+        #expect(viewModel.marketRowViewModels.first?.price.changePercent == "10.00%",
+                "Change percent should be formatted as percentage with 2 decimas.")
     }
 }

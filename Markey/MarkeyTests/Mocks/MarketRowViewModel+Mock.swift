@@ -1,5 +1,5 @@
 //
-//  MarketRowViewModel+ Mock.swift
+//  MarketRowViewModel+Mock.swift
 //  Markey
 //
 //  Created by Kerstin Haustein on 27/09/2025.

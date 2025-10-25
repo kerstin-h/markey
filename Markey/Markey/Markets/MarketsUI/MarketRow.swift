@@ -17,7 +17,7 @@ struct MarketRow: View {
     var body: some View {
         Group {
             Text(viewModel.stockName)
-                .accessibilityIdentifier("_Label.MarketName_\(viewModel.stockName.replacingOccurrences(of: " ", with: "_"))")
+                .accessibilityIdentifier("_Label.MarketName_\(viewModel.stockName.spacesUnderscored)")
             PricesView(stockName: viewModel.stockName, price: viewModel.price)
         }
         .font(.system(size: 15))
@@ -37,9 +37,9 @@ private struct PricesView: View {
     var body: some View {
         Group {
             Text(price.lastPrice)
-                .accessibilityIdentifier("_Label.LastPrice_\(stockName.replacingOccurrences(of: " ", with: "_"))")
+                .accessibilityIdentifier("_Label.LastPrice_\(stockName.spacesUnderscored)")
             Text(price.changePercent)
-                .accessibilityIdentifier("_Label.ChangePercent_\(stockName.replacingOccurrences(of: " ", with: "_"))")
+                .accessibilityIdentifier("_Label.ChangePercent_\(stockName.spacesUnderscored)")
         }
         .font(.system(size: 15, design: .monospaced))
     }

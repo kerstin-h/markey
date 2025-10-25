@@ -7,27 +7,11 @@
 
 import SwiftUI
 
-private enum Environment {
-    case production
-    case swiftUIPreviews
-    case unitTesting
-
-    init(environment: [String : String] = ProcessInfo.processInfo.environment) {
-        if environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-            self = .swiftUIPreviews
-        } else if environment["XCTestSessionIdentifier"] != nil {
-            self = .unitTesting
-        } else {
-            self = .production
-        }
-    }
-}
-
 @main
 struct MarkeyApp: App {
     var body: some Scene {
         WindowGroup {
-            let environment = Environment()
+            let environment = RunningEnvironment()
             switch environment {
             case .production, .swiftUIPreviews:
                 let coordinator = RootCoordinator()

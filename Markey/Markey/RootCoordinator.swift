@@ -19,7 +19,7 @@ final class RootCoordinator {
         return MarketsListViewModel(streamingDataProvider: dataProvider)
     }
     
-    static func configureStreaming() -> DataStreamingServiceProtocol {
+    private static func configureStreaming() -> DataStreamingServiceProtocol {
         let lsConfiguration = LSConfiguration()
         let lightstreamerClient = LightstreamerClient(serverAddress: lsConfiguration.clientConfig.endpoint,
                                                       adapterSet: lsConfiguration.clientConfig.adapterSet)

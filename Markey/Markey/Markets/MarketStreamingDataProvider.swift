@@ -34,8 +34,10 @@ class MarketStreamingDataProvider {
             streamerSubscription = streamingService.newSubscription()
         }
         guard let streamerSubscription else { return }
-        streamerSubscription.streamingDataPublisher.receive(on: DispatchQueue.main).sink(receiveCompletion: { [weak self] completion in
-            if case let .failure(error) = completion {
+        streamerSubscription.streamingDataPublisher
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { [weak self] completion in
+            if case .failure = completion {
                 self?.pricesPublisher.send(completion: .failure(MarketError.streamingFailed))
             }
         }, receiveValue: { [weak self] priceUpdate in

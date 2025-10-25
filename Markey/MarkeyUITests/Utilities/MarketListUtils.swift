@@ -11,7 +11,7 @@ final class MarketListUtils {
     private static let app: XCUIApplication = XCUIApplication()
 
     struct Link {
-        // Note: +Text() concatenation prevents usage of accessibility identifiers.
+        // Note: +Text concatenation prevents usage of accessibility identifiers.
         static let lightstreamer = app.links["https://www.lightstreamer.com"]
     }
 
