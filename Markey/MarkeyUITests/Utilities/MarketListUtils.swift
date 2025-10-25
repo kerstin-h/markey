@@ -12,7 +12,13 @@ final class MarketListUtils {
 
     struct Link {
         // Note: +Text() concatenation prevents usage of accessibility identifiers.
-        static let lightstreamer: XCUIElement = app.links["https://www.lightstreamer.com"]
+        static let lightstreamer = app.links["https://www.lightstreamer.com"]
+    }
+
+    struct Markets {
+        static let marketName = app.staticTexts["_Label.MarketName_Ations_Europe"]
+        static let lastPrice = app.staticTexts["_Label.LastPrice_Ations_Europe"]
+        static let changePercent = app.staticTexts["_Label.ChangePercent_Ations_Europe"]
     }
 
     struct Web {

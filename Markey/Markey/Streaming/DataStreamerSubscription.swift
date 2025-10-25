@@ -53,9 +53,7 @@ extension DataStreamerSubscription: SubscriptionDelegate {
               let changePercent = itemUpdate.value(withFieldName: Fields.percentChange.rawValue) else {
             return
         }
-        
         let priceUpdate = MarketPrice(stockName: stockName, lastPrice: lastPrice, changePercent: changePercent)
-
         Task { @MainActor in
             self.dataPublisher.send(priceUpdate)
         }
@@ -63,7 +61,9 @@ extension DataStreamerSubscription: SubscriptionDelegate {
 
     func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?) {
         let error = StreamingError.subscriptionFailure(code: code, message: message)
-        self.dataPublisher.send(completion: .failure(error))
+        Task { @MainActor in
+            self.dataPublisher.send(completion: .failure(error))
+        }
     }
 
     func subscription(_ subscription: LSSubscription, didClearSnapshotForItemName itemName: String?, itemPos: UInt) {}

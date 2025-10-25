@@ -34,12 +34,12 @@ final class DataStreamingService: DataStreamingServiceProtocol {
     func newSubscription() -> DataStreamerSubscriptionProtocol {
         let config = LSSubscriptionConfiguration()
         let subscription = LSSubscription(subscriptionMode: config.mode,
-                                        items: config.items,
-                                        fields: config.fields)
+                                          items: config.items,
+                                          fields: config.fields)
         subscription.dataAdapter = config.dataAdapter
         subscription.requestedSnapshot = config.requestedSnapshot
         return DataStreamerSubscription(client: client,
-                                         subscription: subscription)
+                                        subscription: subscription)
     }
 
     func startStreaming(subscription: DataStreamerSubscriptionProtocol) {
