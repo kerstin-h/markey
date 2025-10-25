@@ -52,6 +52,7 @@ struct MarketsListView: View {
                         .foregroundStyle(.primary)
                 }
             }
+            .toolbarTitleDisplayMode(.inline)
             .foregroundStyle(
                 LinearGradient(
                     colors: [.accentColor, .accentColor.opacity(0.9)],
@@ -99,6 +100,7 @@ struct MarketsListView: View {
         }
         .font(.system(size: 13))
         .foregroundColor(.accent)
+        .padding(.top, 16)
         .padding(.bottom, 4)
     }
 
