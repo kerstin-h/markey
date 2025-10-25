@@ -320,11 +320,13 @@ final class MarketsListViewModelTests: Confirmation {
     }
 
     @Test("Test data formatted correctly",
-          .tags(.dataFormatting)
+          .tags(.dataFormatting),
+          arguments: [
+            MarketRowViewModel(stockName: "XBox", lastPrice: "100", changePercent: "10")
+          ]
     )
-    func dataFormatting() {
-        let marketRowVMs = [MarketRowViewModel(stockName: "XBox", lastPrice: "100", changePercent: "10")]
-        viewModel = Self.viewModel(marketRowViewModels: marketRowVMs,
+    func dataFormatting(marketRowViewModel: MarketRowViewModel) {
+        viewModel = Self.viewModel(marketRowViewModels: [marketRowViewModel],
                                    streamerSubscription: streamerSubscription)
         #expect(viewModel.marketRowViewModels.first?.stockName == "XBox",
                 "Stock name is incorect.")
@@ -332,5 +334,22 @@ final class MarketsListViewModelTests: Confirmation {
                 "Last price should be formatted as US currency.")
         #expect(viewModel.marketRowViewModels.first?.price.changePercent == "10.00%",
                 "Change percent should be formatted as percentage with 2 decimas.")
+    }
+
+    @Test("Test empty data formatted correctly",
+          .tags(.dataFormatting),
+          arguments: [
+            MarketRowViewModel(stockName: "XBox", lastPrice: "", changePercent: "")
+          ]
+    )
+    func nilDataFormatting(marketRowViewModel: MarketRowViewModel) {
+        viewModel = Self.viewModel(marketRowViewModels: [marketRowViewModel],
+                                   streamerSubscription: streamerSubscription)
+        #expect(viewModel.marketRowViewModels.first?.stockName == "XBox",
+                "Stock name is incorect.")
+        #expect(viewModel.marketRowViewModels.first?.price.lastPrice == "-",
+                "Last price should be formatted as US currency.")
+        #expect(viewModel.marketRowViewModels.first?.price.changePercent == "-",
+                "Change percent should be formatted as percentage with 2 decimals.")
     }
 }
