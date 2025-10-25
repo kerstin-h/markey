@@ -23,10 +23,10 @@ struct MarketsListView: View {
 
     var body: some View {
         contentView
-        .alert("Error occured", isPresented: $viewModel.showAlert) {
-            Button("OK", role: .cancel) { }
+            .alert(.errorTitle, isPresented: $viewModel.showAlert) {
+                Button(.alertOkButton, role: .cancel) { }
         } message: {
-            Text("Cannot retrieve market data.")
+            Text(.errorMsgCannotRetrieveData)
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
@@ -47,7 +47,7 @@ struct MarketsListView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Popular Stocks")
+                    Text(.navigationTitle)
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                 }
@@ -93,9 +93,9 @@ struct MarketsListView: View {
 
     private var marketsHeader: some View {
         LazyVGrid(columns: columns, spacing: .zero) {
-            Text("Market Name".uppercased())
-            Text("Stock Price".uppercased())
-            Text("Change".uppercased())
+            Text(String(localized: .marketNameHeading).uppercased())
+            Text(String(localized: .lastPriceHeading).uppercased())
+            Text(String(localized: .changePercentHeading).uppercased())
         }
         .font(.system(size: 13))
         .foregroundColor(.accent)
@@ -106,12 +106,12 @@ struct MarketsListView: View {
         VStack(spacing: 16) {
             Divider()
             Group {
-                Text("*Data based on a questionable sample of ")
+                Text(.lightstreamerFootnotePrefix)
                     .foregroundColor(.gray)
-                + Text("[Lightstreamer](https://www.lightstreamer.com)")
+                + Text(.lightstreamerLink)
                     .foregroundColor(.accentColor)
                     .underline()
-                + Text(" demo stocks.")
+                + Text(.lighstreamerFootnoteSuffix)
                     .foregroundColor(.gray)
             }
             .font(.system(size: 13))
