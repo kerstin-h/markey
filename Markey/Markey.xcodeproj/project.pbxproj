@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A52865002E73565F002C6DF8 /* LightstreamerClient in Frameworks */ = {isa = PBXBuildFile; productRef = A52864FF2E73565F002C6DF8 /* LightstreamerClient */; };
+		A54B51382EACF0CA0065D613 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = A54B51372EACF0CA0065D613 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A54B51372EACF0CA0065D613 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
 		A5BFD1EC2E734F6C003DB2B6 /* Markey.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Markey.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5BFD2002E734F6E003DB2B6 /* MarkeyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MarkeyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5BFD20A2E734F6E003DB2B6 /* MarkeyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MarkeyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -96,6 +98,7 @@
 				A5BFD1EE2E734F6C003DB2B6 /* Markey */,
 				A5BFD2032E734F6E003DB2B6 /* MarkeyTests */,
 				A5BFD20D2E734F6E003DB2B6 /* MarkeyUITests */,
+				A54B51372EACF0CA0065D613 /* README.md */,
 				A5BFD1ED2E734F6C003DB2B6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -234,6 +237,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A54B51382EACF0CA0065D613 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
