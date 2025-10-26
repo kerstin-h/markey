@@ -12,12 +12,14 @@ final class MarketsListViewModel: ObservableObject {
     @Published private(set) var marketRowViewModels: [MarketRowViewModel]
     @Published var showAlert = false
 
-    private let dataFormatter = DataFormatter()
+    private let dataFormatter: DataFormatter
     private let streamingDataProvider: MarketStreamingDataProvider
     private var subscriptions = Set<AnyCancellable>()
     
-    init(marketRowViewModels: [MarketRowViewModel] = [MarketRowViewModel](),
+    init(dataFormatter: DataFormatter,
+         marketRowViewModels: [MarketRowViewModel] = [MarketRowViewModel](),
          streamingDataProvider: MarketStreamingDataProvider) {
+        self.dataFormatter = dataFormatter
         self.marketRowViewModels = marketRowViewModels
         self.streamingDataProvider = streamingDataProvider
     }
@@ -44,7 +46,8 @@ final class MarketsListViewModel: ObservableObject {
         if let viewModel = viewModel(for: marketPrice.stockName) {
             viewModel.price = Price(marketPrice: marketPrice, dataFormatter: dataFormatter)
         } else {
-            marketRowViewModels.append(MarketRowViewModel(marketPrice: marketPrice))
+            marketRowViewModels.append(MarketRowViewModel(dataFormatter: dataFormatter,
+                                                          marketPrice: marketPrice))
             marketRowViewModels.sort(by: { $0.stockName < $1.stockName })
         }
     }

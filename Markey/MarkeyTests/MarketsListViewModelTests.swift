@@ -32,11 +32,13 @@ final class MarketsListViewModelTests: Confirmation {
 
     // MARK: Test helpers
 
-    private static func viewModel(marketRowViewModels: [MarketRowViewModel] = [MarketRowViewModel](),
+    private static func viewModel(dataFormatter: DataFormatter = DataFormatter(),
+                                  marketRowViewModels: [MarketRowViewModel] = [MarketRowViewModel](),
                                   streamerSubscription: DataStreamerSubscriptionMock) -> MarketsListViewModel {
         let streamingService = DataStreamingServiceMock(streamerSubscription: streamerSubscription)
         let dataProvider = MarketStreamingDataProvider(streamingService: streamingService)
-        return MarketsListViewModel(marketRowViewModels: marketRowViewModels,
+        return MarketsListViewModel(dataFormatter: dataFormatter,
+                                    marketRowViewModels: marketRowViewModels,
                                     streamingDataProvider: dataProvider)
     }
 

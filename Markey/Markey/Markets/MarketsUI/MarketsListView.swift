@@ -29,12 +29,14 @@ struct MarketsListView: View {
             Text(.errorMsgCannotRetrieveData)
         }
         .onChange(of: scenePhase) { _, newPhase in
-            switch newPhase {
-            case .active:
-                viewModel.startStreaming()
-            case .inactive, .background:
-                viewModel.stopStreaming()
-            @unknown default: break
+            Task { @MainActor in
+                switch newPhase {
+                case .active:
+                    viewModel.startStreaming()
+                case .inactive, .background:
+                    viewModel.stopStreaming()
+                @unknown default: break
+                }
             }
         }
     }

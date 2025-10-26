@@ -16,7 +16,9 @@ final class RootCoordinator {
     static func createViewModel() -> MarketsListViewModel {
         let streamingService = configureStreaming()
         let dataProvider = MarketStreamingDataProvider(streamingService: streamingService)
-        return MarketsListViewModel(streamingDataProvider: dataProvider)
+        let dataFormatter = DataFormatter()
+        return MarketsListViewModel(dataFormatter: dataFormatter,
+                                    streamingDataProvider: dataProvider)
     }
     
     private static func configureStreaming() -> DataStreamingServiceProtocol {
