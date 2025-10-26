@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "compression-type" : "gpu-optimized-smallest",
+      "compression-type" : "gpu-optimized-best",
       "filename" : "Markey_Stars_4096-2048.png",
       "idiom" : "universal"
     }

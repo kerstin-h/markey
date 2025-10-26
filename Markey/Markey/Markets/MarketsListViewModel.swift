@@ -46,9 +46,10 @@ final class MarketsListViewModel: ObservableObject {
         if let viewModel = viewModel(for: marketPrice.stockName) {
             viewModel.price = Price(marketPrice: marketPrice, dataFormatter: dataFormatter)
         } else {
-            marketRowViewModels.append(MarketRowViewModel(dataFormatter: dataFormatter,
-                                                          marketPrice: marketPrice))
-            marketRowViewModels.sort(by: { $0.stockName < $1.stockName })
+            let newViewModel = MarketRowViewModel(dataFormatter: dataFormatter, marketPrice: marketPrice)
+            let insertIndex = marketRowViewModels.firstIndex { $0.stockName > newViewModel.stockName } ?? marketRowViewModels.endIndex
+            marketRowViewModels.insert(newViewModel, at: insertIndex)
+
         }
     }
 
