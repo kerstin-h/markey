@@ -10,6 +10,9 @@ import Combine
 
 final class DataStreamerSubscriptionMock: DataStreamerSubscriptionProtocol {
     private let dataPublisher = PassthroughSubject<MarketPrice, StreamingError>()
+
+    var subscribed = false
+
     lazy var streamingDataPublisher: AnyPublisher<MarketPrice, StreamingError> = {
         dataPublisher.eraseToAnyPublisher()
     }()
@@ -22,7 +25,11 @@ final class DataStreamerSubscriptionMock: DataStreamerSubscriptionProtocol {
         dataPublisher.send(completion: .failure(error))
     }
 
-    func subscribe() {}
-    
-    func unsubscribe() {}
+    func subscribe() {
+        subscribed = true
+    }
+
+    func unsubscribe() {
+        subscribed = false
+    }
 }

@@ -10,10 +10,10 @@ protocol DataStreamingServiceProtocol {
     func startStreaming(subscription: DataStreamerSubscriptionProtocol)
 }
 
-final class DataStreamingService: DataStreamingServiceProtocol {
+class DataStreamingService: DataStreamingServiceProtocol {
     
-    private let client: LightstreamerClientProtocol
-    private var connected = false
+    let client: LightstreamerClientProtocol
+    var connected = false
     
     init(client: LightstreamerClientProtocol) {
         self.client = client
@@ -22,12 +22,14 @@ final class DataStreamingService: DataStreamingServiceProtocol {
     private func connectIfNeeded() {
         if !connected {
             client.connect()
+            connected = true
         }
     }
     
     private func disconnectIfNeeded() {
         if connected {
             client.disconnect()
+            connected = false
         }
     }
 
@@ -47,7 +49,7 @@ final class DataStreamingService: DataStreamingServiceProtocol {
         subscription.subscribe()
     }
 
-    func stopStreaming(subscription: DataStreamerSubscription) {
+    func stopStreaming(subscription: DataStreamerSubscriptionProtocol) {
         disconnectIfNeeded()
         subscription.unsubscribe()
     }
