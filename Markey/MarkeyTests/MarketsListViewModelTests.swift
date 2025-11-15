@@ -90,7 +90,7 @@ final class MarketsListViewModelTests: Confirmation {
     func startStreamingBeginsUpdates(for priceUpdate: TestData<MarketPrice, MarketRowViewModel>) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        viewModel.startStreaming()
+        await viewModel.startStreaming()
         await sendStreamingUpdate(marketPrices: [priceUpdate.inputData])
 
         let firstMarket = try #require(viewModel.marketRowViewModels.first)
@@ -103,7 +103,7 @@ final class MarketsListViewModelTests: Confirmation {
     func startStreamingFailureShowsAlert() async throws {
         #expect(viewModel.showAlert == false,
                 "Market list should not show alert by default")
-        viewModel.startStreaming()
+        await viewModel.startStreaming()
         await sendStreamingError(.subscriptionFailure(code: 1, message: nil))
         #expect(viewModel.showAlert == true,
                 "Market list should show error alert on streaming failure")
@@ -129,7 +129,7 @@ final class MarketsListViewModelTests: Confirmation {
     func marketsSortedAlphabetically(for priceUpdates: TestData<[MarketPrice], [MarketRowViewModel]>) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        viewModel.startStreaming()
+        await viewModel.startStreaming()
         await sendStreamingUpdate(marketPrices: priceUpdates.inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates.expectedResult.count)
@@ -170,7 +170,7 @@ final class MarketsListViewModelTests: Confirmation {
     func marketUpdatesSortedAlphabetically(for priceUpdates: [TestData<[MarketPrice], [MarketRowViewModel]>]) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        viewModel.startStreaming()
+        await viewModel.startStreaming()
         await sendStreamingUpdate(marketPrices: priceUpdates[0].inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates[0].expectedResult.count)
@@ -225,7 +225,7 @@ final class MarketsListViewModelTests: Confirmation {
 
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        viewModel.startStreaming()
+        await viewModel.startStreaming()
         await sendStreamingUpdate(marketPrices: marketPrices)
 
         try #require(viewModel.marketRowViewModels.count == 3)
@@ -260,7 +260,7 @@ final class MarketsListViewModelTests: Confirmation {
     func stopStreaming(for priceUpdates: [TestData<[MarketPrice], [MarketRowViewModel]>]) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        viewModel.startStreaming()
+        await viewModel.startStreaming()
 
         await sendStreamingUpdate(marketPrices: priceUpdates[0].inputData)
 
@@ -299,7 +299,7 @@ final class MarketsListViewModelTests: Confirmation {
     func stopStartStreaming(for priceUpdates: [TestData<[MarketPrice], [MarketRowViewModel]>]) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        viewModel.startStreaming()
+        await viewModel.startStreaming()
         await sendStreamingUpdate(marketPrices: priceUpdates[0].inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates[0].expectedResult.count)
@@ -313,7 +313,7 @@ final class MarketsListViewModelTests: Confirmation {
         #expect(viewModel.marketRowViewModels == priceUpdates[1].expectedResult,
                 "Market list should ignore \(priceUpdates[1].description) after stopping streaming")
 
-        viewModel.startStreaming()
+        await viewModel.startStreaming()
         await sendStreamingUpdate(marketPrices: priceUpdates[2].inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates[2].expectedResult.count)

@@ -28,10 +28,10 @@ class MarketStreamingDataProvider {
     init(streamingService: DataStreamingServiceProtocol) {
         self.streamingService = streamingService
     }
-    
-    func startStreaming() {
+
+    func startStreaming() async {
         if streamerSubscription == nil {
-            streamerSubscription = streamingService.newSubscription()
+            streamerSubscription = await streamingService.newSubscription()
         }
         guard let streamerSubscription else { return }
         streamerSubscription.streamingDataPublisher
@@ -43,7 +43,9 @@ class MarketStreamingDataProvider {
         }, receiveValue: { [weak self] priceUpdate in
             self?.pricesPublisher.send(priceUpdate)
         }).store(in: &priceSubscriptions)
-        streamingService.startStreaming(subscription: streamerSubscription)
+        Task {
+            await streamingService.startStreaming(subscription: streamerSubscription)
+        }
     }
     
     func stopStreaming() {

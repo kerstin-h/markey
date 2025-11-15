@@ -32,7 +32,7 @@ struct MarketsListView: View {
             Task { @MainActor in
                 switch newPhase {
                 case .active:
-                    viewModel.startStreaming()
+                    await viewModel.startStreaming()
                 case .inactive, .background:
                     viewModel.stopStreaming()
                 @unknown default: break

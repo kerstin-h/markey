@@ -7,7 +7,7 @@
 
 @testable import Markey
 
-final class DataStreamingServiceMock: DataStreamingServiceProtocol {
+actor DataStreamingServiceMock: DataStreamingServiceProtocol {
     private let streamerSubscription: DataStreamerSubscriptionMock
     
     init(streamerSubscription: DataStreamerSubscriptionMock) {

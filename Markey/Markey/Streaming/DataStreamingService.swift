@@ -5,18 +5,21 @@
 //  Created by Kerstin Haustein on 13/09/2025.
 //
 
-protocol DataStreamingServiceProtocol {
+protocol DataStreamingServiceProtocol: Actor {
     func newSubscription() -> DataStreamerSubscriptionProtocol
     func startStreaming(subscription: DataStreamerSubscriptionProtocol)
 }
 
-class DataStreamingService: DataStreamingServiceProtocol {
-    
+actor DataStreamingService: DataStreamingServiceProtocol {
+
     let client: LightstreamerClientProtocol
+    let subscriptionBuilder: SubscriptionBuilderProtocol
     var connected = false
     
-    init(client: LightstreamerClientProtocol) {
+    init(client: LightstreamerClientProtocol,
+         subscriptionBuilder: SubscriptionBuilderProtocol = SubscriptionBuilder()) {
         self.client = client
+        self.subscriptionBuilder = subscriptionBuilder
     }
     
     private func connectIfNeeded() {
@@ -34,14 +37,7 @@ class DataStreamingService: DataStreamingServiceProtocol {
     }
 
     func newSubscription() -> DataStreamerSubscriptionProtocol {
-        let config = LSSubscriptionConfiguration()
-        let subscription = LSSubscription(subscriptionMode: config.mode,
-                                          items: config.items,
-                                          fields: config.fields)
-        subscription.dataAdapter = config.dataAdapter
-        subscription.requestedSnapshot = config.requestedSnapshot
-        return DataStreamerSubscription(client: client,
-                                        subscription: subscription)
+        subscriptionBuilder.newSubscription(client: client)
     }
 
     func startStreaming(subscription: DataStreamerSubscriptionProtocol) {
@@ -54,4 +50,3 @@ class DataStreamingService: DataStreamingServiceProtocol {
         subscription.unsubscribe()
     }
 }
-
