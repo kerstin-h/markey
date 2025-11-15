@@ -16,14 +16,18 @@ struct StreamingConfirm: ConfirmationHandler {
 }
 
 actor DataStreamingServiceMock: DataStreamingServiceProtocol {
-    let streamingConfirmation = StreamingConfirm()
+    private(set) var streamingConfirmation = StreamingConfirm()
 
     private let streamerSubscription: DataStreamerSubscriptionMock
     
     init(streamerSubscription: DataStreamerSubscriptionMock) {
         self.streamerSubscription = streamerSubscription
     }
-    
+
+    func resetConfirm() {
+        streamingConfirmation = StreamingConfirm()
+    }
+
     func newSubscription() -> any Markey.DataStreamerSubscriptionProtocol {
         streamerSubscription
     }

@@ -21,7 +21,7 @@ protocol DataStreamerSubscriptionProtocol: Actor {
 
 actor DataStreamerSubscription: DataStreamerSubscriptionProtocol {
     private weak var client: LightstreamerClientProtocol?
-    nonisolated private let dataPublisher = PassthroughSubject<MarketPrice, StreamingError>()
+    private let dataPublisher = PassthroughSubject<MarketPrice, StreamingError>()
     private let subscription: LSSubscription
     
     lazy var streamingDataPublisher: AnyPublisher<MarketPrice, StreamingError> = {
@@ -54,15 +54,15 @@ extension DataStreamerSubscription: SubscriptionDelegate {
             return
         }
         let priceUpdate = MarketPrice(stockName: stockName, lastPrice: lastPrice, changePercent: changePercent)
-        Task { @MainActor in
-            self.dataPublisher.send(priceUpdate)
+        Task {
+            await self.dataPublisher.send(priceUpdate)
         }
     }
 
     nonisolated func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?) {
         let error = StreamingError.subscriptionFailure(code: code, message: message)
-        Task { @MainActor in
-            self.dataPublisher.send(completion: .failure(error))
+        Task {
+            await dataPublisher.send(completion: .failure(error))
         }
     }
 

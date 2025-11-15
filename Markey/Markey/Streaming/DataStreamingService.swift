@@ -11,7 +11,6 @@ protocol DataStreamingServiceProtocol: Actor {
 }
 
 actor DataStreamingService: DataStreamingServiceProtocol {
-
     let client: LightstreamerClientProtocol
     let subscriptionBuilder: SubscriptionBuilderProtocol
     var connected = false

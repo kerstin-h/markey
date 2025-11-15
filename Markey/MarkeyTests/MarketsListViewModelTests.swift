@@ -45,6 +45,7 @@ final class MarketsListViewModelTests: ConfirmationHandler {
 
     private func streamingStarted() async {
         confirm = newConfirm()
+        await streamingService.resetConfirm()
         await streamingService.streamingConfirmation.confirmation {
             self.confirm()
         }
@@ -333,6 +334,7 @@ final class MarketsListViewModelTests: ConfirmationHandler {
                 "Market list should ignore \(priceUpdates[1].description) after stopping streaming")
 
         viewModel.startStreaming()
+        await streamingStarted()
         await sendStreamingUpdate(marketPrices: priceUpdates[2].inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates[2].expectedResult.count)
