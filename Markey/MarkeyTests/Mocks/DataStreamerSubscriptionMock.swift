@@ -8,7 +8,7 @@
 import Combine
 @testable import Markey
 
-final class DataStreamerSubscriptionMock: DataStreamerSubscriptionProtocol {
+actor DataStreamerSubscriptionMock: DataStreamerSubscriptionProtocol {
     private let dataPublisher = PassthroughSubject<MarketPrice, StreamingError>()
 
     var subscribed = false

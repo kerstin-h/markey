@@ -24,7 +24,7 @@ final class MarketsListViewModel: ObservableObject {
         self.streamingDataProvider = streamingDataProvider
     }
 
-    func startStreaming() async {
+    func startStreaming() {
         streamingDataProvider.marketPricesPublisher
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in
@@ -34,7 +34,7 @@ final class MarketsListViewModel: ObservableObject {
             }, receiveValue: { [weak self] marketPrice in
                 self?.update(marketPrice: marketPrice)
             }).store(in: &subscriptions)
-        await streamingDataProvider.startStreaming()
+        streamingDataProvider.startStreaming()
     }
 
     func stopStreaming() {

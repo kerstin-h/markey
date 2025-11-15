@@ -19,27 +19,35 @@ extension Tag {
 
 @Suite("Market List",
        .tags(.marketList))
-final class MarketsListViewModelTests: Confirmation {
+final class MarketsListViewModelTests: ConfirmationHandler {
     private var viewModel: MarketsListViewModel
+    private var streamingService: DataStreamingServiceMock
     private let streamerSubscription = DataStreamerSubscriptionMock()
     private var subscriptions = Set<AnyCancellable>()
 
     var confirm: Confirm?
 
     init() {
-        viewModel = Self.viewModel(streamerSubscription: streamerSubscription)
+        streamingService = DataStreamingServiceMock(streamerSubscription: streamerSubscription)
+        viewModel = Self.createViewModel(streamingService: streamingService)
     }
 
     // MARK: Test helpers
 
-    private static func viewModel(dataFormatter: DataFormatter = DataFormatter(),
-                                  marketRowViewModels: [MarketRowViewModel] = [MarketRowViewModel](),
-                                  streamerSubscription: DataStreamerSubscriptionMock) -> MarketsListViewModel {
-        let streamingService = DataStreamingServiceMock(streamerSubscription: streamerSubscription)
+    private static func createViewModel(dataFormatter: DataFormatter = DataFormatter(),
+                                        marketRowViewModels: [MarketRowViewModel] = [MarketRowViewModel](),
+                                        streamingService: DataStreamingServiceMock) -> MarketsListViewModel {
         let dataProvider = MarketStreamingDataProvider(streamingService: streamingService)
         return MarketsListViewModel(dataFormatter: dataFormatter,
                                     marketRowViewModels: marketRowViewModels,
                                     streamingDataProvider: dataProvider)
+    }
+
+    private func streamingStarted() async {
+        confirm = newConfirm()
+        await streamingService.streamingConfirmation.confirmation {
+            self.confirm()
+        }
     }
 
     private func sendStreamingUpdate(marketPrices: [MarketPrice],
@@ -55,7 +63,7 @@ final class MarketsListViewModelTests: Confirmation {
                 }
             }).store(in: &self.subscriptions)
             for index in 0..<marketPrices.count {
-                self.streamerSubscription.publish(marketPrices[index])
+                await self.streamerSubscription.publish(marketPrices[index])
             }
         }
     }
@@ -72,7 +80,7 @@ final class MarketsListViewModelTests: Confirmation {
                     }
                 }, receiveValue: { _ in }
                 ).store(in: &self.subscriptions)
-            self.streamerSubscription.publish(error)
+            await self.streamerSubscription.publish(error)
         }
     }
 
@@ -90,7 +98,9 @@ final class MarketsListViewModelTests: Confirmation {
     func startStreamingBeginsUpdates(for priceUpdate: TestData<MarketPrice, MarketRowViewModel>) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        await viewModel.startStreaming()
+
+        viewModel.startStreaming()
+        await streamingStarted()
         await sendStreamingUpdate(marketPrices: [priceUpdate.inputData])
 
         let firstMarket = try #require(viewModel.marketRowViewModels.first)
@@ -103,7 +113,7 @@ final class MarketsListViewModelTests: Confirmation {
     func startStreamingFailureShowsAlert() async throws {
         #expect(viewModel.showAlert == false,
                 "Market list should not show alert by default")
-        await viewModel.startStreaming()
+        viewModel.startStreaming()
         await sendStreamingError(.subscriptionFailure(code: 1, message: nil))
         #expect(viewModel.showAlert == true,
                 "Market list should show error alert on streaming failure")
@@ -129,7 +139,9 @@ final class MarketsListViewModelTests: Confirmation {
     func marketsSortedAlphabetically(for priceUpdates: TestData<[MarketPrice], [MarketRowViewModel]>) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        await viewModel.startStreaming()
+
+        viewModel.startStreaming()
+        await streamingStarted()
         await sendStreamingUpdate(marketPrices: priceUpdates.inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates.expectedResult.count)
@@ -170,7 +182,9 @@ final class MarketsListViewModelTests: Confirmation {
     func marketUpdatesSortedAlphabetically(for priceUpdates: [TestData<[MarketPrice], [MarketRowViewModel]>]) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        await viewModel.startStreaming()
+
+        viewModel.startStreaming()
+        await streamingStarted()
         await sendStreamingUpdate(marketPrices: priceUpdates[0].inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates[0].expectedResult.count)
@@ -225,7 +239,9 @@ final class MarketsListViewModelTests: Confirmation {
 
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        await viewModel.startStreaming()
+
+        viewModel.startStreaming()
+        await streamingStarted()
         await sendStreamingUpdate(marketPrices: marketPrices)
 
         try #require(viewModel.marketRowViewModels.count == 3)
@@ -260,8 +276,9 @@ final class MarketsListViewModelTests: Confirmation {
     func stopStreaming(for priceUpdates: [TestData<[MarketPrice], [MarketRowViewModel]>]) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        await viewModel.startStreaming()
 
+        viewModel.startStreaming()
+        await streamingStarted()
         await sendStreamingUpdate(marketPrices: priceUpdates[0].inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates[0].expectedResult.count)
@@ -299,7 +316,9 @@ final class MarketsListViewModelTests: Confirmation {
     func stopStartStreaming(for priceUpdates: [TestData<[MarketPrice], [MarketRowViewModel]>]) async throws {
         #expect(viewModel.marketRowViewModels.count == 0,
                 "Market list should be empty")
-        await viewModel.startStreaming()
+
+        viewModel.startStreaming()
+        await streamingStarted()
         await sendStreamingUpdate(marketPrices: priceUpdates[0].inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates[0].expectedResult.count)
@@ -313,7 +332,7 @@ final class MarketsListViewModelTests: Confirmation {
         #expect(viewModel.marketRowViewModels == priceUpdates[1].expectedResult,
                 "Market list should ignore \(priceUpdates[1].description) after stopping streaming")
 
-        await viewModel.startStreaming()
+        viewModel.startStreaming()
         await sendStreamingUpdate(marketPrices: priceUpdates[2].inputData)
 
         try #require(viewModel.marketRowViewModels.count == priceUpdates[2].expectedResult.count)
@@ -328,8 +347,7 @@ final class MarketsListViewModelTests: Confirmation {
           ]
     )
     func dataFormatting(marketRowViewModel: MarketRowViewModel) {
-        viewModel = Self.viewModel(marketRowViewModels: [marketRowViewModel],
-                                   streamerSubscription: streamerSubscription)
+        viewModel = Self.createViewModel(marketRowViewModels: [marketRowViewModel], streamingService: streamingService)
         #expect(viewModel.marketRowViewModels.first?.stockName == "XBox",
                 "Stock name is incorect.")
         #expect(viewModel.marketRowViewModels.first?.price.lastPrice == "$100.00",
@@ -345,8 +363,7 @@ final class MarketsListViewModelTests: Confirmation {
           ]
     )
     func nilDataFormatting(marketRowViewModel: MarketRowViewModel) {
-        viewModel = Self.viewModel(marketRowViewModels: [marketRowViewModel],
-                                   streamerSubscription: streamerSubscription)
+        viewModel = Self.createViewModel(marketRowViewModels: [marketRowViewModel], streamingService: streamingService)
         #expect(viewModel.marketRowViewModels.first?.stockName == "XBox",
                 "Stock name is incorect.")
         #expect(viewModel.marketRowViewModels.first?.price.lastPrice == "-",

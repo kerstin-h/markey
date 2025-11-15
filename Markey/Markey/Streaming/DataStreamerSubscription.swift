@@ -12,16 +12,16 @@ enum StreamingError: Error {
     case subscriptionFailure(code: Int, message: String?)
 }
 
-protocol DataStreamerSubscriptionProtocol {
+protocol DataStreamerSubscriptionProtocol: Actor {
     var streamingDataPublisher: AnyPublisher<MarketPrice, StreamingError> { get }
 
     func subscribe()
     func unsubscribe()
 }
 
-final class DataStreamerSubscription: DataStreamerSubscriptionProtocol {
+actor DataStreamerSubscription: DataStreamerSubscriptionProtocol {
     private weak var client: LightstreamerClientProtocol?
-    private let dataPublisher = PassthroughSubject<MarketPrice, StreamingError>()
+    nonisolated private let dataPublisher = PassthroughSubject<MarketPrice, StreamingError>()
     private let subscription: LSSubscription
     
     lazy var streamingDataPublisher: AnyPublisher<MarketPrice, StreamingError> = {
@@ -46,7 +46,7 @@ final class DataStreamerSubscription: DataStreamerSubscriptionProtocol {
 }
 
 extension DataStreamerSubscription: SubscriptionDelegate {
-    func subscription(_ subscription: LSSubscription,
+    nonisolated func subscription(_ subscription: LSSubscription,
                       didUpdateItem itemUpdate: ItemUpdate) {
         guard let stockName = itemUpdate.value(withFieldName: Fields.stockName.rawValue),
               let lastPrice = itemUpdate.value(withFieldName: Fields.lastPrice.rawValue),
@@ -59,31 +59,31 @@ extension DataStreamerSubscription: SubscriptionDelegate {
         }
     }
 
-    func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?) {
+    nonisolated func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?) {
         let error = StreamingError.subscriptionFailure(code: code, message: message)
         Task { @MainActor in
             self.dataPublisher.send(completion: .failure(error))
         }
     }
 
-    func subscription(_ subscription: LSSubscription, didClearSnapshotForItemName itemName: String?, itemPos: UInt) {}
+    nonisolated func subscription(_ subscription: LSSubscription, didClearSnapshotForItemName itemName: String?, itemPos: UInt) {}
 
-    func subscription(_ subscription: LSSubscription, didLoseUpdates lostUpdates: UInt, forCommandSecondLevelItemWithKey key: String) {}
-    
-    func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?, forCommandSecondLevelItemWithKey key: String) {}
-    
-    func subscription(_ subscription: LSSubscription, didEndSnapshotForItemName itemName: String?, itemPos: UInt) {}
-    
-    func subscription(_ subscription: LSSubscription, didLoseUpdates lostUpdates: UInt, forItemName itemName: String?, itemPos: UInt) {}
-    
-    func subscriptionDidRemoveDelegate(_ subscription: LSSubscription) {}
-    
-    func subscriptionDidAddDelegate(_ subscription: LSSubscription) {}
-    
-    func subscriptionDidSubscribe(_ subscription: LSSubscription) {}
-    
-    func subscriptionDidUnsubscribe(_ subscription: LSSubscription) {}
-    
-    func subscription(_ subscription: LSSubscription, didReceiveRealFrequency frequency: RealMaxFrequency?) {}
+    nonisolated func subscription(_ subscription: LSSubscription, didLoseUpdates lostUpdates: UInt, forCommandSecondLevelItemWithKey key: String) {}
+
+    nonisolated func subscription(_ subscription: LSSubscription, didFailWithErrorCode code: Int, message: String?, forCommandSecondLevelItemWithKey key: String) {}
+
+    nonisolated func subscription(_ subscription: LSSubscription, didEndSnapshotForItemName itemName: String?, itemPos: UInt) {}
+
+    nonisolated func subscription(_ subscription: LSSubscription, didLoseUpdates lostUpdates: UInt, forItemName itemName: String?, itemPos: UInt) {}
+
+    nonisolated func subscriptionDidRemoveDelegate(_ subscription: LSSubscription) {}
+
+    nonisolated func subscriptionDidAddDelegate(_ subscription: LSSubscription) {}
+
+    nonisolated func subscriptionDidSubscribe(_ subscription: LSSubscription) {}
+
+    nonisolated func subscriptionDidUnsubscribe(_ subscription: LSSubscription) {}
+
+    nonisolated func subscription(_ subscription: LSSubscription, didReceiveRealFrequency frequency: RealMaxFrequency?) {}
 }
 

@@ -28,7 +28,8 @@ struct DataStreamingServiceTests {
                                                comment: Comment) async {
         let serviceConnectedStatus = await service.connected
         #expect(serviceConnectedStatus == connected, comment)
-        #expect(subscription?.subscribed == connected, comment)
+        let subscribedStatus = await subscription?.subscribed
+        #expect(subscribedStatus == connected, comment)
         #expect(client?.connected == connected, comment)
     }
 

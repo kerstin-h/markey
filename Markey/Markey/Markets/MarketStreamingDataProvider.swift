@@ -29,27 +29,29 @@ class MarketStreamingDataProvider {
         self.streamingService = streamingService
     }
 
-    func startStreaming() async {
-        if streamerSubscription == nil {
-            streamerSubscription = await streamingService.newSubscription()
-        }
-        guard let streamerSubscription else { return }
-        streamerSubscription.streamingDataPublisher
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { [weak self] completion in
-            if case .failure = completion {
-                self?.pricesPublisher.send(completion: .failure(MarketError.streamingFailed))
-            }
-        }, receiveValue: { [weak self] priceUpdate in
-            self?.pricesPublisher.send(priceUpdate)
-        }).store(in: &priceSubscriptions)
+    func startStreaming() {
         Task {
+            if streamerSubscription == nil {
+                streamerSubscription = await streamingService.newSubscription()
+            }
+            guard let streamerSubscription else { return }
+            await streamerSubscription.streamingDataPublisher
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { [weak self] completion in
+                    if case .failure = completion {
+                        self?.pricesPublisher.send(completion: .failure(MarketError.streamingFailed))
+                    }
+                }, receiveValue: { [weak self] priceUpdate in
+                    self?.pricesPublisher.send(priceUpdate)
+                }).store(in: &priceSubscriptions)
             await streamingService.startStreaming(subscription: streamerSubscription)
         }
     }
     
     func stopStreaming() {
-        streamerSubscription?.unsubscribe()
-        priceSubscriptions.removeAll()
+        Task {
+            await streamerSubscription?.unsubscribe()
+            priceSubscriptions.removeAll()
+        }
     }
 }

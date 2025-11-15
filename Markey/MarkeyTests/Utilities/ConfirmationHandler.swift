@@ -1,5 +1,5 @@
 //
-//  Confirmation.swift
+//  ConfirmationHandler.swift
 //  Markey
 //
 //  Created by Kerstin Haustein on 20/09/2025.
@@ -12,13 +12,13 @@ import XCTest
 /// Wraps XCTestExpectation to provide reliable testing of Combine behavior
 /// since Swift Testing's confirmation API doesn't work reliably with publishers yet
 /// and using a checked continuation will hang if an update is not received.
-protocol Confirmation {
+protocol ConfirmationHandler {
     var confirm: Confirm? { get }
 }
 
-extension Confirmation {
+extension ConfirmationHandler {
     func newConfirm(comment: String = "",
-                    isInverted: Bool) -> Confirm {
+                    isInverted: Bool = false) -> Confirm {
         let confirm = XCTestExpectation(description: comment)
         confirm.isInverted = isInverted
         return confirm
@@ -30,14 +30,14 @@ extension Confirmation {
 
     func confirmation(expectedCount: Int = 1,
                       isInverted: Bool = true,
-                      body: @escaping () -> Void) async {
+                      body: @escaping () async -> Void) async {
         guard let confirm = confirm as? XCTestExpectation else {
             return
         }
         if confirm.expectedFulfillmentCount != expectedCount {
             confirm.expectedFulfillmentCount = expectedCount
         }
-        body()
+        await body()
         await XCTWaiter().fulfillment(of: [confirm], timeout: 1.0)
     }
 }

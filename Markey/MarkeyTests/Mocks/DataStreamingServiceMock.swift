@@ -7,7 +7,17 @@
 
 @testable import Markey
 
+struct StreamingConfirm: ConfirmationHandler {
+    var confirm: (any Confirm)?
+
+    init() {
+        confirm = newConfirm(comment: "Streaming started", isInverted: false)
+    }
+}
+
 actor DataStreamingServiceMock: DataStreamingServiceProtocol {
+    let streamingConfirmation = StreamingConfirm()
+
     private let streamerSubscription: DataStreamerSubscriptionMock
     
     init(streamerSubscription: DataStreamerSubscriptionMock) {
@@ -18,5 +28,7 @@ actor DataStreamingServiceMock: DataStreamingServiceProtocol {
         streamerSubscription
     }
     
-    func startStreaming(subscription: any Markey.DataStreamerSubscriptionProtocol) {}
+    func startStreaming(subscription: any Markey.DataStreamerSubscriptionProtocol) {
+        streamingConfirmation.confirm()
+    }
 }

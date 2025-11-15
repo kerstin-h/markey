@@ -7,7 +7,7 @@
 
 protocol DataStreamingServiceProtocol: Actor {
     func newSubscription() -> DataStreamerSubscriptionProtocol
-    func startStreaming(subscription: DataStreamerSubscriptionProtocol)
+    func startStreaming(subscription: DataStreamerSubscriptionProtocol) async
 }
 
 actor DataStreamingService: DataStreamingServiceProtocol {
@@ -40,13 +40,13 @@ actor DataStreamingService: DataStreamingServiceProtocol {
         subscriptionBuilder.newSubscription(client: client)
     }
 
-    func startStreaming(subscription: DataStreamerSubscriptionProtocol) {
+    func startStreaming(subscription: DataStreamerSubscriptionProtocol) async {
         connectIfNeeded()
-        subscription.subscribe()
+        await subscription.subscribe()
     }
 
-    func stopStreaming(subscription: DataStreamerSubscriptionProtocol) {
+    func stopStreaming(subscription: DataStreamerSubscriptionProtocol) async {
         disconnectIfNeeded()
-        subscription.unsubscribe()
+        await subscription.unsubscribe()
     }
 }
